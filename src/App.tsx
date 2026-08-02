@@ -7,25 +7,21 @@ import { FounderProfileCard } from './components/dashboard/FounderProfileCard';
 import { SmartGuidesCard } from './components/dashboard/SmartGuidesCard';
 import { AccountsRecordDashboard } from './components/dashboard/AccountsRecordDashboard';
 
-import { AICounselorChat } from './components/ai/AICounselorChat';
-import { VpsStrategyNotes } from './components/notes/VpsStrategyNotes';
+import { IncomeExpenseTracker } from './components/financials/IncomeExpenseTracker';
+import { TaxStrategyHub } from './components/tax/TaxStrategyHub';
+import { CreditScoreHub } from './components/credit/CreditScoreHub';
 import { DocumentVault } from './components/vault/DocumentVault';
-import { FicoCreditHub } from './components/credit/FicoCreditHub';
-import { DebtCommandCenter } from './components/debts/DebtCommandCenter';
-import { TaxEngine } from './components/tax/TaxEngine';
+import { VpsStrategyNotes } from './components/notes/VpsStrategyNotes';
 
 const MainAppContent: React.FC = () => {
   const [activeHub, setActiveHub] = useState<MainHubTab>('cashflow');
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (mobile && activeHub === 'cashflow') {
-        setActiveHub('chat');
-      }
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -33,10 +29,10 @@ const MainAppContent: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#38393e] text-[#101217] font-sans p-4 md:p-8 flex flex-col items-center justify-center selection:bg-[#00e676] selection:text-black">
+    <div className="min-h-screen bg-[#3a3b40] text-[#101217] font-jakarta p-4 md:p-8 flex flex-col items-center justify-center selection:bg-[#10d670] selection:text-white">
       
-      {/* Master $50,000+ Frame Container (Exact Match to Reference Image) */}
-      <div className="master-frame w-full max-w-[1380px] p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+      {/* Master $50,000+ Frame Container (Exact Match to Reference Layout) */}
+      <div className="master-frame w-full max-w-[1380px] p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden font-jakarta">
         
         {/* Master Circular Top Navigation Bar */}
         <Navbar 
@@ -55,7 +51,7 @@ const MainAppContent: React.FC = () => {
               <SmartGuidesCard />
             </div>
 
-            {/* Right Column: Accounts Record Dashboard */}
+            {/* Right Column: Accounts Record Dashboard / AI Counselor Chat */}
             <div className="lg:col-span-1">
               <AccountsRecordDashboard />
             </div>
@@ -63,44 +59,41 @@ const MainAppContent: React.FC = () => {
           </div>
         )}
 
-        {/* HUB 2: AI COUNSELOR CHAT & VPS NOTES */}
+        {/* HUB 2: CASH FLOW TRACKER */}
         {activeHub === 'chat' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[680px]">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <AICounselorChat onNavigateTab={(tab) => {
-                if (tab === 'cashflow' || tab === 'credit' || tab === 'tax') {
-                  setActiveHub(tab as MainHubTab);
-                } else {
-                  setActiveHub('chat');
-                }
-              }} isMobile={isMobile} />
+              <IncomeExpenseTracker />
             </div>
-
-            <div className="space-y-4">
+            <div className="lg:col-span-1">
               <VpsStrategyNotes />
             </div>
           </div>
         )}
 
-        {/* HUB 3: DEUDAS & FICO HUB */}
+        {/* HUB 3: CRÉDITO & FICO SCORE */}
         {activeHub === 'credit' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DebtCommandCenter />
-            <FicoCreditHub />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <CreditScoreHub />
+            </div>
+            <div className="lg:col-span-1">
+              <AccountsRecordDashboard />
+            </div>
           </div>
         )}
 
         {/* HUB 4: TAXES & BÓVEDA OCR */}
         {activeHub === 'tax' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <TaxEngine />
+            <TaxStrategyHub />
             <DocumentVault />
           </div>
         )}
 
         {/* Executive Footer */}
-        <footer className="pt-4 text-center text-xs text-gray-400 border-t border-gray-200/60 font-medium">
-          AURA Financial OS • Architecture $50,000+ Executive UI Clone • Servidor VPS 187.77.3.244
+        <footer className="pt-4 text-center text-xs text-gray-500 border-t border-gray-200/60 font-medium">
+          AURA Financial OS • Architecture $50,000+ Interlocking Executive UI • Servidor VPS 187.77.3.244
         </footer>
 
       </div>
