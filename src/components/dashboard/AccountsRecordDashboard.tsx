@@ -33,6 +33,7 @@ export const AccountsRecordDashboard: React.FC = () => {
     scrollToBottom();
   }, [chatMessages]);
 
+  // Web Speech API Voice Dictation: Real-time text injection directly into the input field (WhatsApp style)
   const startVoiceRecording = () => {
     setIsRecording(true);
     setShowPlusMenu(false);
@@ -136,7 +137,7 @@ export const AccountsRecordDashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col relative w-full font-jakarta">
+    <div className="flex flex-col relative w-full font-jakarta transition-all duration-300">
       
       {/* Dark Header Cap (Interlocking Top Cap) */}
       <div 
@@ -152,24 +153,11 @@ export const AccountsRecordDashboard: React.FC = () => {
               AURA AI Counselor
               <span className="w-2.5 h-2.5 rounded-full bg-[#10d670] animate-pulse" />
             </h3>
-            <p className="text-[10px] text-gray-300 font-medium">Asistente Ejecutivo VPS</p>
+            <p className="text-[10px] text-gray-300 font-medium">Asistente Ejecutivo VPS & Dictado</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Easy-to-click Feedback Button */}
-          <button 
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowFeedbackModal(true);
-            }}
-            className="px-3.5 py-1.5 rounded-full bg-[#10d670] text-[#101217] font-extrabold text-xs hover:bg-[#d6f535] transition-all flex items-center gap-1 shadow-sm"
-          >
-            <MessageSquarePlus className="w-3.5 h-3.5" />
-            <span>Feedback</span>
-          </button>
-
           <button className="md:hidden text-white p-1">
             {isCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
           </button>
@@ -179,9 +167,9 @@ export const AccountsRecordDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* White Body (100% Full Width Container) */}
+      {/* White Body (100% Full Width Screen Edge Container When Extended) */}
       {!isCollapsed && (
-        <div className="interlock-white-body pt-6 px-3 sm:px-6 pb-6 space-y-4 flex-1 flex flex-col w-full animate-fadeIn">
+        <div className="interlock-white-body pt-6 px-2 sm:px-5 pb-4 space-y-4 flex-1 flex flex-col w-full animate-fadeIn transition-all duration-300">
           
           {/* Opportunity Metrics & 3-Tone Donut Chart */}
           <div className="sub-card-white p-4 space-y-3 w-full">
@@ -220,8 +208,8 @@ export const AccountsRecordDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* AI Chat Messages Container (100% Full Width) */}
-          <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/70 p-3 sm:p-4 space-y-3 min-h-[380px] max-h-[480px] w-full overflow-hidden relative">
+          {/* AI Chat Messages Container (100% Full Screen Width Edge-to-Edge) */}
+          <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/70 p-3 sm:p-4 space-y-3 min-h-[400px] max-h-[500px] w-full overflow-hidden relative shadow-xs">
             
             {/* Scrollable Messages */}
             <div className="flex-1 overflow-y-auto space-y-3 pr-1 w-full">
@@ -293,12 +281,12 @@ export const AccountsRecordDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Voice Dictation Status */}
+            {/* Voice Dictation Live Status Bar */}
             {isRecording && (
               <div className="p-3 rounded-xl bg-[#e64a53]/15 border border-[#e64a53]/40 flex items-center justify-between text-xs animate-pulse">
                 <div className="flex items-center gap-2 font-bold text-[#e64a53]">
                   <Mic className="w-4 h-4 animate-bounce" />
-                  <span>Dictando por voz... ({recordingSeconds}s)</span>
+                  <span>Escuchando voz... Transcribiendo al texto ({recordingSeconds}s)</span>
                 </div>
                 <button 
                   type="button"
@@ -310,18 +298,9 @@ export const AccountsRecordDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* WhatsApp-Style Left (+) Button Menu Popover */}
+            {/* Left (+) Button Attachment Menu Popover */}
             {showPlusMenu && (
               <div className="absolute bottom-16 left-3 z-30 w-56 bg-white rounded-2xl shadow-2xl border border-gray-200 p-2 text-xs font-bold space-y-1 animate-fadeIn">
-                <button
-                  type="button"
-                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                  className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2.5 text-[#101217]"
-                >
-                  <Mic className="w-4 h-4 text-[#e64a53]" />
-                  <span>🎙️ Dictar por Voz</span>
-                </button>
-
                 <button
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
@@ -342,39 +321,71 @@ export const AccountsRecordDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Generous WhatsApp-Style Input Bar with Left (+) Button */}
-            <form onSubmit={handleSend} className="flex items-center gap-2 pt-2 border-t border-gray-200 w-full relative">
+            {/* WhatsApp Cloned Input Bar: Left (+), Center Text, Right (Mic 🎙️ + Send ➔) */}
+            <form onSubmit={handleSend} className="flex items-center gap-1.5 pt-2 border-t border-gray-200 w-full relative">
               <input type="file" accept=".pdf" ref={fileInputRef} className="hidden" onChange={(e) => handleFileUpload(e, 'pdf')} />
               <input type="file" accept="image/*" ref={imageInputRef} className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
 
-              {/* WhatsApp-Style Left (+) Button */}
+              {/* Left (+) Button for Files/Images */}
               <button
                 type="button"
                 onClick={() => setShowPlusMenu(!showPlusMenu)}
                 className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all shadow-sm shrink-0 ${
                   showPlusMenu ? 'bg-[#101217] text-white border-[#101217]' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
                 }`}
-                title="Opciones de adjunto y voz"
+                title="Adjuntar Foto o PDF"
               >
                 <Plus className={`w-5 h-5 transition-transform ${showPlusMenu ? 'rotate-45' : ''}`} />
               </button>
 
+              {/* Center Text Field */}
               <input
                 type="text"
-                placeholder={isRecording ? "Dictando por voz..." : "Escribe un mensaje..."}
+                placeholder={isRecording ? "Escuchando voz..." : "Escribe o habla..."}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 className="flex-1 px-4 py-3 rounded-full bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670] shadow-2xs"
               />
 
+              {/* Right WhatsApp Mic 🎙️ Button (Hold/Tap to Dictate Speech into Input Field) */}
+              <button
+                type="button"
+                onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                onTouchStart={startVoiceRecording}
+                onTouchEnd={stopVoiceRecording}
+                onMouseDown={startVoiceRecording}
+                onMouseUp={stopVoiceRecording}
+                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all shadow-sm shrink-0 ${
+                  isRecording ? 'bg-[#e64a53] text-white border-[#e64a53] animate-pulse scale-110' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
+                title="Presiona o mantén para dictar por voz"
+              >
+                <Mic className="w-5 h-5" />
+              </button>
+
+              {/* Right Send Button ➔ */}
               <button
                 type="submit"
                 disabled={!input.trim() && attachments.length === 0}
                 className="w-11 h-11 rounded-full bg-[#101217] text-white flex items-center justify-center disabled:opacity-40 hover:scale-105 transition-all shadow-md shrink-0"
+                title="Enviar mensaje"
               >
                 <Send className="w-5 h-5" />
               </button>
             </form>
+
+            {/* Subtle, Easy-to-click Feedback Button Placed Directly BELOW the Chat Input Field */}
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={() => setShowFeedbackModal(true)}
+                className="px-5 py-2 rounded-full bg-[#101217] text-white text-xs font-bold font-jakarta inline-flex items-center justify-center gap-1.5 shadow-sm hover:scale-105 hover:bg-black transition-all border border-gray-800"
+              >
+                <MessageSquarePlus className="w-3.5 h-3.5 text-[#10d670]" />
+                <span>Dejar Feedback / Nota en VPS</span>
+              </button>
+            </div>
+
           </div>
 
         </div>
