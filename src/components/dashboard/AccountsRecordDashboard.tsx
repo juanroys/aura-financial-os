@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowUpRight, Bot, Send, Sparkles, User, Save, Mic, Paperclip, Image, FileText, Square, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowUpRight, Bot, Send, Sparkles, User, Save, Mic, Paperclip, Image, FileText, Square, ChevronDown, ChevronUp, Plus, MessageSquarePlus } from 'lucide-react';
 import { useFinancials } from '../../context/FinancialContext';
 import type { ChatAttachment } from '../../types';
 
@@ -12,6 +12,8 @@ export const AccountsRecordDashboard: React.FC = () => {
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showPlusMenu, setShowPlusMenu] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   // Voice recording & Speech-to-Text state
   const [isRecording, setIsRecording] = useState(false);
@@ -33,6 +35,7 @@ export const AccountsRecordDashboard: React.FC = () => {
 
   const startVoiceRecording = () => {
     setIsRecording(true);
+    setShowPlusMenu(false);
     setRecordingSeconds(0);
     recordingTimerRef.current = setInterval(() => {
       setRecordingSeconds(prev => prev + 1);
@@ -82,6 +85,7 @@ export const AccountsRecordDashboard: React.FC = () => {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'pdf' | 'image') => {
+    setShowPlusMenu(false);
     if (e.target.files && e.target.files[0]) {
       const f = e.target.files[0];
       const attach: ChatAttachment = {
@@ -104,6 +108,7 @@ export const AccountsRecordDashboard: React.FC = () => {
     sendChatMessage(input, attachments.length > 0 ? attachments : undefined);
     setInput('');
     setAttachments([]);
+    setShowPlusMenu(false);
   };
 
   const handleSaveVpsNote = async () => {
@@ -118,7 +123,10 @@ export const AccountsRecordDashboard: React.FC = () => {
       if (res.ok) {
         setNewNoteInput('');
         setNoteSaved(true);
-        setTimeout(() => setNoteSaved(false), 2500);
+        setTimeout(() => {
+          setNoteSaved(false);
+          setShowFeedbackModal(false);
+        }, 1500);
       }
     } catch (err) {
       console.error('Error saving VPS note:', err);
@@ -130,7 +138,7 @@ export const AccountsRecordDashboard: React.FC = () => {
   return (
     <div className="flex flex-col relative w-full font-jakarta">
       
-      {/* Dark Header Cap (Collapsible Tap Bar on Mobile) */}
+      {/* Dark Header Cap (Interlocking Top Cap) */}
       <div 
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="interlock-dark-cap flex items-center justify-between cursor-pointer md:cursor-default"
@@ -144,12 +152,24 @@ export const AccountsRecordDashboard: React.FC = () => {
               AURA AI Counselor
               <span className="w-2.5 h-2.5 rounded-full bg-[#10d670] animate-pulse" />
             </h3>
-            <p className="text-[10px] text-gray-300 font-medium">Asistente Ejecutivo VPS & Dictado</p>
+            <p className="text-[10px] text-gray-300 font-medium">Asistente Ejecutivo VPS</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Collapse Toggle Chevron */}
+          {/* Easy-to-click Feedback Button */}
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowFeedbackModal(true);
+            }}
+            className="px-3.5 py-1.5 rounded-full bg-[#10d670] text-[#101217] font-extrabold text-xs hover:bg-[#d6f535] transition-all flex items-center gap-1 shadow-sm"
+          >
+            <MessageSquarePlus className="w-3.5 h-3.5" />
+            <span>Feedback</span>
+          </button>
+
           <button className="md:hidden text-white p-1">
             {isCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
           </button>
@@ -159,12 +179,12 @@ export const AccountsRecordDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* White Body (Collapsible on Mobile) */}
+      {/* White Body (100% Full Width Container) */}
       {!isCollapsed && (
-        <div className="interlock-white-body pt-6 px-4 sm:px-6 pb-6 space-y-4 flex-1 flex flex-col animate-fadeIn">
+        <div className="interlock-white-body pt-6 px-3 sm:px-6 pb-6 space-y-4 flex-1 flex flex-col w-full animate-fadeIn">
           
           {/* Opportunity Metrics & 3-Tone Donut Chart */}
-          <div className="sub-card-white p-4 space-y-3">
+          <div className="sub-card-white p-4 space-y-3 w-full">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold text-[#101217]">Opportunity Metrics</h4>
               <span className="text-[10px] text-gray-400 font-bold">FICO: {ficoReport.score} ({ficoReport.tier})</span>
@@ -200,11 +220,11 @@ export const AccountsRecordDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* AI Chat Messages Container */}
-          <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/70 p-3.5 space-y-3 min-h-[380px] max-h-[480px] overflow-hidden">
+          {/* AI Chat Messages Container (100% Full Width) */}
+          <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/70 p-3 sm:p-4 space-y-3 min-h-[380px] max-h-[480px] w-full overflow-hidden relative">
             
             {/* Scrollable Messages */}
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1 w-full">
               {chatMessages.map((msg) => (
                 <div
                   key={msg.id}
@@ -216,7 +236,7 @@ export const AccountsRecordDashboard: React.FC = () => {
                     {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                   </div>
 
-                  <div className="max-w-[85%] space-y-1.5">
+                  <div className="max-w-[88%] space-y-1.5">
                     {msg.attachments && msg.attachments.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mb-1">
                         {msg.attachments.map((att, idx) => (
@@ -230,7 +250,7 @@ export const AccountsRecordDashboard: React.FC = () => {
                       </div>
                     )}
 
-                    <div className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                    <div className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
                       msg.sender === 'user'
                         ? 'bg-[#101217] text-white rounded-tr-none shadow-sm'
                         : 'bg-white text-gray-800 border border-gray-200/80 rounded-tl-none shadow-sm'
@@ -290,48 +310,58 @@ export const AccountsRecordDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Generous WhatsApp-Style Multimodal Control Bar */}
-            <form onSubmit={handleSend} className="flex items-center gap-2 pt-2 border-t border-gray-200">
+            {/* WhatsApp-Style Left (+) Button Menu Popover */}
+            {showPlusMenu && (
+              <div className="absolute bottom-16 left-3 z-30 w-56 bg-white rounded-2xl shadow-2xl border border-gray-200 p-2 text-xs font-bold space-y-1 animate-fadeIn">
+                <button
+                  type="button"
+                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2.5 text-[#101217]"
+                >
+                  <Mic className="w-4 h-4 text-[#e64a53]" />
+                  <span>🎙️ Dictar por Voz</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2.5 text-[#101217]"
+                >
+                  <Image className="w-4 h-4 text-[#d6f535]" />
+                  <span>🖼️ Adjuntar Foto / Recibo</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2.5 text-[#101217]"
+                >
+                  <Paperclip className="w-4 h-4 text-[#10d670]" />
+                  <span>📄 Adjuntar Extracto PDF</span>
+                </button>
+              </div>
+            )}
+
+            {/* Generous WhatsApp-Style Input Bar with Left (+) Button */}
+            <form onSubmit={handleSend} className="flex items-center gap-2 pt-2 border-t border-gray-200 w-full relative">
               <input type="file" accept=".pdf" ref={fileInputRef} className="hidden" onChange={(e) => handleFileUpload(e, 'pdf')} />
               <input type="file" accept="image/*" ref={imageInputRef} className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
 
-              {/* Large Touch Target Buttons (WhatsApp Style 44px) */}
+              {/* WhatsApp-Style Left (+) Button */}
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="w-11 h-11 rounded-full bg-white border border-gray-300 text-gray-700 flex items-center justify-center hover:bg-gray-100 transition-all shadow-sm shrink-0"
-                title="Adjuntar PDF"
-              >
-                <Paperclip className="w-5 h-5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => imageInputRef.current?.click()}
-                className="w-11 h-11 rounded-full bg-white border border-gray-300 text-gray-700 flex items-center justify-center hover:bg-gray-100 transition-all shadow-sm shrink-0"
-                title="Adjuntar foto de recibo"
-              >
-                <Image className="w-5 h-5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                onTouchStart={startVoiceRecording}
-                onTouchEnd={stopVoiceRecording}
-                onMouseDown={startVoiceRecording}
-                onMouseUp={stopVoiceRecording}
+                onClick={() => setShowPlusMenu(!showPlusMenu)}
                 className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all shadow-sm shrink-0 ${
-                  isRecording ? 'bg-[#e64a53] text-white border-[#e64a53] animate-pulse scale-110' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
+                  showPlusMenu ? 'bg-[#101217] text-white border-[#101217]' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
                 }`}
-                title="Dictar por voz"
+                title="Opciones de adjunto y voz"
               >
-                <Mic className="w-5 h-5" />
+                <Plus className={`w-5 h-5 transition-transform ${showPlusMenu ? 'rotate-45' : ''}`} />
               </button>
 
               <input
                 type="text"
-                placeholder={isRecording ? "Dictando por voz..." : "Escribe o habla..."}
+                placeholder={isRecording ? "Dictando por voz..." : "Escribe un mensaje..."}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 className="flex-1 px-4 py-3 rounded-full bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670] shadow-2xs"
@@ -347,33 +377,55 @@ export const AccountsRecordDashboard: React.FC = () => {
             </form>
           </div>
 
-          {/* Quick VPS Note Widget */}
-          <div className="p-3 rounded-2xl bg-white border border-gray-200 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#101217] flex items-center gap-1">
-                <Save className="w-3.5 h-3.5 text-[#10d670]" /> Guardar Nota en VPS (`user_notes.md`)
-              </span>
-              {noteSaved && <span className="text-[#10d670] font-bold text-xs">✓ Guardado</span>}
+        </div>
+      )}
+
+      {/* Easy-to-click Feedback Modal */}
+      {showFeedbackModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 font-jakarta animate-fadeIn">
+          <div className="w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl space-y-4 border border-gray-200">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <h3 className="text-sm font-extrabold text-[#101217] flex items-center gap-2">
+                <MessageSquarePlus className="w-4 h-4 text-[#10d670]" /> Dejar Feedback / Nota en VPS
+              </h3>
+              <button onClick={() => setShowFeedbackModal(false)} className="text-gray-400 font-bold hover:text-gray-600">×</button>
             </div>
 
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Ej: Regla 25% impuestos..."
+            {noteSaved && (
+              <div className="p-3 rounded-xl bg-[#10d670]/20 border border-[#10d670]/40 text-[#10d670] font-bold text-center text-xs">
+                ✓ Feedback grabado con éxito en `server/data/user_notes.md` del VPS
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-700 block">Escribe tu feedback o regla de estrategia:</label>
+              <textarea
+                rows={4}
+                placeholder="Ej: Ajustar el porcentaje de ahorro de impuestos a 25% y priorizar pago de tarjetas..."
                 value={newNoteInput}
                 onChange={(e) => setNewNoteInput(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-800"
+                className="w-full p-3 rounded-xl bg-gray-50 border border-gray-300 text-xs text-gray-800 focus:outline-none focus:border-[#101217]"
               />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
               <button
+                type="button"
+                onClick={() => setShowFeedbackModal(false)}
+                className="px-4 py-2.5 rounded-full border border-gray-300 text-gray-700 text-xs font-bold hover:bg-gray-100"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
                 onClick={handleSaveVpsNote}
                 disabled={!newNoteInput.trim() || isSavingNote}
-                className="px-4 py-2 rounded-xl bg-[#101217] text-white text-xs font-bold disabled:opacity-40 hover:bg-black transition-all"
+                className="px-5 py-2.5 rounded-full bg-[#101217] text-white text-xs font-bold hover:bg-black disabled:opacity-40 shadow-sm flex items-center gap-1.5"
               >
-                {isSavingNote ? '...' : 'Guardar'}
+                <Save className="w-4 h-4" /> {isSavingNote ? 'Guardando...' : 'Guardar en VPS'}
               </button>
             </div>
           </div>
-
         </div>
       )}
 
