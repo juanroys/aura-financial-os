@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, 
   Send, 
@@ -51,9 +52,15 @@ export const AICounselorChat: React.FC<AICounselorChatProps> = ({ onNavigateTab,
   ];
 
   return (
-    <div className={`flex flex-col h-full vision-glass rounded-3xl border border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden ${
-      isMobile ? 'min-h-[80vh]' : ''
-    }`}>
+    <motion.div 
+      layout
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      className={`flex flex-col h-full vision-glass rounded-3xl border border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden ${
+        isMobile ? 'min-h-[80vh]' : ''
+      }`}
+    >
       
       {/* Header */}
       <div className="px-5 py-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
@@ -73,13 +80,13 @@ export const AICounselorChat: React.FC<AICounselorChatProps> = ({ onNavigateTab,
           </div>
         </div>
 
-        {/* Position Controls (Desktop Only) */}
+        {/* Position Controls (Desktop Only with Framer Motion spring layout) */}
         {!isMobile && (
           <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10">
             <button
               onClick={() => setChatDockPosition('left')}
               className={`p-1.5 rounded-lg text-xs transition-all ${
-                chatDockPosition === 'left' ? 'bg-[#00f2fe] text-black font-bold' : 'text-gray-400 hover:text-white'
+                chatDockPosition === 'left' ? 'bg-[#00f2fe] text-black font-bold shadow-md scale-105' : 'text-gray-400 hover:text-white'
               }`}
               title="Acoplar a la Izquierda"
             >
@@ -89,7 +96,7 @@ export const AICounselorChat: React.FC<AICounselorChatProps> = ({ onNavigateTab,
             <button
               onClick={() => setChatDockPosition('right')}
               className={`p-1.5 rounded-lg text-xs transition-all ${
-                chatDockPosition === 'right' ? 'bg-[#00f2fe] text-black font-bold' : 'text-gray-400 hover:text-white'
+                chatDockPosition === 'right' ? 'bg-[#00f2fe] text-black font-bold shadow-md scale-105' : 'text-gray-400 hover:text-white'
               }`}
               title="Acoplar a la Derecha"
             >
@@ -99,7 +106,7 @@ export const AICounselorChat: React.FC<AICounselorChatProps> = ({ onNavigateTab,
             <button
               onClick={() => setChatDockPosition('bottom')}
               className={`p-1.5 rounded-lg text-xs transition-all ${
-                chatDockPosition === 'bottom' ? 'bg-[#00f2fe] text-black font-bold' : 'text-gray-400 hover:text-white'
+                chatDockPosition === 'bottom' ? 'bg-[#00f2fe] text-black font-bold shadow-md scale-105' : 'text-gray-400 hover:text-white'
               }`}
               title="Cajón Flotante Abajo"
             >
@@ -111,59 +118,65 @@ export const AICounselorChat: React.FC<AICounselorChatProps> = ({ onNavigateTab,
 
       {/* Messages Scroll Area */}
       <div className="flex-1 p-4 overflow-y-auto space-y-4 max-h-[550px]">
-        {chatMessages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex items-start gap-3 ${
-              msg.sender === 'user' ? 'flex-row-reverse' : ''
-            }`}
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs ${
-              msg.sender === 'user' 
-                ? 'bg-gradient-to-r from-[#7928ca] to-[#ff416c] text-white shadow-md' 
-                : 'bg-[#00f2fe]/20 text-[#00f2fe] border border-[#00f2fe]/40'
-            }`}>
-              {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
-            </div>
-
-            <div className={`max-w-[82%] space-y-2`}>
-              <div className={`p-4 rounded-2xl text-xs leading-relaxed ${
-                msg.sender === 'user'
-                  ? 'bg-gradient-to-r from-[#7928ca]/30 to-[#ff416c]/20 border border-white/15 text-white rounded-tr-none'
-                  : 'bg-white/5 border border-white/10 text-gray-200 rounded-tl-none shadow-xl'
+        <AnimatePresence initial={false}>
+          {chatMessages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className={`flex items-start gap-3 ${
+                msg.sender === 'user' ? 'flex-row-reverse' : ''
+              }`}
+            >
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs ${
+                msg.sender === 'user' 
+                  ? 'bg-gradient-to-r from-[#7928ca] to-[#ff416c] text-white shadow-md' 
+                  : 'bg-[#00f2fe]/20 text-[#00f2fe] border border-[#00f2fe]/40'
               }`}>
-                {msg.text.split('\n').map((line, idx) => (
-                  <p key={idx} className={idx > 0 ? 'mt-1.5' : ''}>{line}</p>
-                ))}
+                {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
               </div>
 
-              {/* Action Buttons inside AI message */}
-              {msg.sender === 'ai' && msg.suggestions && msg.suggestions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {msg.suggestions.map((promptText, pIdx) => (
-                    <button
-                      key={pIdx}
-                      onClick={() => sendChatMessage(promptText)}
-                      className="px-3 py-1 rounded-xl bg-[#00f2fe]/10 hover:bg-[#00f2fe]/20 border border-[#00f2fe]/30 text-[#00f2fe] text-[11px] font-semibold transition-all text-left"
-                    >
-                      {promptText}
-                    </button>
+              <div className={`max-w-[82%] space-y-2`}>
+                <div className={`p-4 rounded-2xl text-xs leading-relaxed ${
+                  msg.sender === 'user'
+                    ? 'bg-gradient-to-r from-[#7928ca]/30 to-[#ff416c]/20 border border-white/15 text-white rounded-tr-none'
+                    : 'bg-white/5 border border-white/10 text-gray-200 rounded-tl-none shadow-xl'
+                }`}>
+                  {msg.text.split('\n').map((line, idx) => (
+                    <p key={idx} className={idx > 0 ? 'mt-1.5' : ''}>{line}</p>
                   ))}
                 </div>
-              )}
 
-              {/* Quick Navigation link payload if provided */}
-              {msg.actionPayload?.tab && (
-                <button
-                  onClick={() => onNavigateTab(msg.actionPayload!.tab!)}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#10b981] hover:bg-[#10b981]/80 text-black font-bold text-xs transition-all flex items-center gap-1 shadow-md"
-                >
-                  Abrir Módulo de Control <Zap className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+                {/* Action Buttons inside AI message */}
+                {msg.sender === 'ai' && msg.suggestions && msg.suggestions.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {msg.suggestions.map((promptText, pIdx) => (
+                      <button
+                        key={pIdx}
+                        onClick={() => sendChatMessage(promptText)}
+                        className="px-3 py-1 rounded-xl bg-[#00f2fe]/10 hover:bg-[#00f2fe]/20 border border-[#00f2fe]/30 text-[#00f2fe] text-[11px] font-semibold transition-all text-left"
+                      >
+                        {promptText}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Quick Navigation link payload if provided */}
+                {msg.actionPayload?.tab && (
+                  <button
+                    onClick={() => onNavigateTab(msg.actionPayload!.tab!)}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#10b981] hover:bg-[#10b981]/80 text-black font-bold text-xs transition-all flex items-center gap-1 shadow-md"
+                  >
+                    Abrir Módulo de Control <Zap className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
 
@@ -174,7 +187,7 @@ export const AICounselorChat: React.FC<AICounselorChatProps> = ({ onNavigateTab,
           <button
             key={idx}
             onClick={() => sendChatMessage(qp)}
-            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-[11px] whitespace-nowrap transition-all"
+            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-[11px] whitespace-nowrap transition-all hover:scale-105"
           >
             {qp}
           </button>
@@ -199,6 +212,6 @@ export const AICounselorChat: React.FC<AICounselorChatProps> = ({ onNavigateTab,
         </button>
       </form>
 
-    </div>
+    </motion.div>
   );
 };
