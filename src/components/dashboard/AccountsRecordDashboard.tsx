@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowUpRight, Bot, Send, Sparkles, User, Save, Mic, Paperclip, Image, FileText, Volume2, Square } from 'lucide-react';
+import { ArrowUpRight, Bot, Send, Sparkles, User, Save, Mic, Paperclip, Image, FileText, Square } from 'lucide-react';
 import { useFinancials } from '../../context/FinancialContext';
 import type { ChatAttachment } from '../../types';
 
@@ -12,10 +12,11 @@ export const AccountsRecordDashboard: React.FC = () => {
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
 
-  // Voice recording state
+  // Voice recording & Speech-to-Text state
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const recordingTimerRef = useRef<any>(null);
+  const recognitionRef = useRef<any>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -29,39 +30,55 @@ export const AccountsRecordDashboard: React.FC = () => {
     scrollToBottom();
   }, [chatMessages]);
 
-  // Handle Voice Recording Toggle
-  const startRecording = () => {
+  // Clean Speech-to-Text Voice Recording directly filling the input text (WhatsApp style)
+  const startVoiceRecording = () => {
     setIsRecording(true);
     setRecordingSeconds(0);
     recordingTimerRef.current = setInterval(() => {
       setRecordingSeconds(prev => prev + 1);
     }, 1000);
 
-    // Use Web Speech Recognition if supported
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognition.lang = 'es-ES';
-      recognition.interimResults = false;
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(prev => (prev ? `${prev} ${transcript}` : transcript));
+        let currentTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          currentTranscript += event.results[i][0].transcript;
+        }
+        if (currentTranscript.trim()) {
+          setInput(currentTranscript);
+        }
       };
+
+      recognition.onerror = (err: any) => {
+        console.warn('Speech recognition error:', err);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+        if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      };
+
       recognition.start();
+      recognitionRef.current = recognition;
     }
   };
 
-  const stopRecording = () => {
+  const stopVoiceRecording = () => {
     setIsRecording(false);
     if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-    
-    // Add voice note attachment chip
-    const audioAttach: ChatAttachment = {
-      name: `Nota_de_voz_${recordingSeconds}s.mp3`,
-      type: 'audio',
-      size: `${recordingSeconds}s`
-    };
-    setAttachments(prev => [...prev, audioAttach]);
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (err) {
+        console.warn('Error stopping recognition:', err);
+      }
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'pdf' | 'image') => {
@@ -124,7 +141,7 @@ export const AccountsRecordDashboard: React.FC = () => {
               AURA AI Counselor
               <span className="w-2 h-2 rounded-full bg-[#10d670] animate-pulse" />
             </h3>
-            <p className="text-[10px] text-gray-300 font-medium">Multimodal AI Engine (Voz, Fotos & PDF)</p>
+            <p className="text-[10px] text-gray-300 font-medium">Dictado de Voz en Vivo & Adjuntos</p>
           </div>
         </div>
 
@@ -174,7 +191,7 @@ export const AccountsRecordDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Multimodal Conversational AI Chat Area */}
+        {/* Real Dynamic AI Chat Area */}
         <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/70 p-3.5 space-y-3 min-h-[380px] max-h-[480px] overflow-hidden">
           
           {/* Scrollable Messages */}
@@ -196,7 +213,6 @@ export const AccountsRecordDashboard: React.FC = () => {
                     <div className="flex flex-wrap gap-1.5 mb-1">
                       {msg.attachments.map((att, idx) => (
                         <div key={idx} className="p-2 rounded-xl bg-white border border-gray-200 shadow-2xs text-[10px] flex items-center gap-1.5 font-bold text-[#101217]">
-                          {att.type === 'audio' && <Volume2 className="w-3.5 h-3.5 text-[#10d670]" />}
                           {att.type === 'image' && <Image className="w-3.5 h-3.5 text-[#d6f535]" />}
                           {att.type === 'pdf' && <FileText className="w-3.5 h-3.5 text-[#e64a53]" />}
                           <span className="truncate max-w-[120px]">{att.name}</span>
@@ -240,8 +256,7 @@ export const AccountsRecordDashboard: React.FC = () => {
             <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-xl border border-gray-200">
               {attachments.map((att, idx) => (
                 <div key={idx} className="px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-200 text-[10px] font-bold text-gray-800 flex items-center gap-1.5">
-                  {att.type === 'audio' ? <Volume2 className="w-3 h-3 text-[#10d670]" /> :
-                   att.type === 'image' ? <Image className="w-3 h-3 text-[#d6f535]" /> :
+                  {att.type === 'image' ? <Image className="w-3 h-3 text-[#d6f535]" /> :
                    <FileText className="w-3 h-3 text-[#e64a53]" />}
                   <span className="truncate max-w-[100px]">{att.name}</span>
                   <button onClick={() => removeAttachment(idx)} className="text-gray-400 hover:text-red-500 font-bold ml-1">×</button>
@@ -250,23 +265,24 @@ export const AccountsRecordDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Voice Recording Active Bar */}
+          {/* Voice Dictation Active Bar */}
           {isRecording && (
             <div className="p-2 rounded-xl bg-[#e64a53]/15 border border-[#e64a53]/40 flex items-center justify-between text-xs animate-pulse">
               <div className="flex items-center gap-2 font-bold text-[#e64a53]">
                 <Mic className="w-4 h-4 animate-bounce" />
-                <span>Grabando Nota de Voz... ({recordingSeconds}s)</span>
+                <span>Escuchando tu voz... ({recordingSeconds}s)</span>
               </div>
               <button 
-                onClick={stopRecording}
-                className="px-3 py-1 rounded-lg bg-[#e64a53] text-white text-[10px] font-extrabold flex items-center gap-1"
+                type="button"
+                onClick={stopVoiceRecording}
+                className="px-3 py-1 rounded-lg bg-[#e64a53] text-white text-[10px] font-extrabold flex items-center gap-1 hover:bg-red-600"
               >
-                <Square className="w-3 h-3 fill-white" /> Detener
+                <Square className="w-3 h-3 fill-white" /> Listo
               </button>
             </div>
           )}
 
-          {/* Multimodal Input Bar (Text + Voice + Image + PDF) */}
+          {/* Multimodal Input Bar (Text Dictation + Images + PDF) */}
           <form onSubmit={handleSend} className="flex items-center gap-1.5 pt-2 border-t border-gray-200">
             {/* Hidden inputs */}
             <input 
@@ -304,21 +320,25 @@ export const AccountsRecordDashboard: React.FC = () => {
               <Image className="w-3.5 h-3.5" />
             </button>
 
-            {/* Voice Mic Button */}
+            {/* WhatsApp-style Mic Button (Hold to Talk or Tap to Dictate) */}
             <button
               type="button"
-              onClick={isRecording ? stopRecording : startRecording}
+              onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+              onTouchStart={startVoiceRecording}
+              onTouchEnd={stopVoiceRecording}
+              onMouseDown={startVoiceRecording}
+              onMouseUp={stopVoiceRecording}
               className={`p-2 rounded-xl border transition-all shadow-2xs ${
-                isRecording ? 'bg-[#e64a53] text-white border-[#e64a53] animate-pulse' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
+                isRecording ? 'bg-[#e64a53] text-white border-[#e64a53] animate-pulse scale-110' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
               }`}
-              title="Grabar nota de voz"
+              title="Presiona o mantén presionado para dictar por voz"
             >
               <Mic className="w-3.5 h-3.5" />
             </button>
 
             <input
               type="text"
-              placeholder="Escribe, habla o adjunta..."
+              placeholder={isRecording ? "Dictando por voz..." : "Escribe o habla..."}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className="flex-1 px-3 py-2 rounded-xl bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670]"
