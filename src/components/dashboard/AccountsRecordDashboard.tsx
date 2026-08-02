@@ -33,7 +33,6 @@ export const AccountsRecordDashboard: React.FC = () => {
     scrollToBottom();
   }, [chatMessages]);
 
-  // Web Speech API Voice Dictation: Real-time text injection directly into the input field (WhatsApp style)
   const startVoiceRecording = () => {
     setIsRecording(true);
     setShowPlusMenu(false);
@@ -139,7 +138,7 @@ export const AccountsRecordDashboard: React.FC = () => {
   return (
     <div className="flex flex-col relative w-full font-jakarta transition-all duration-300">
       
-      {/* Dark Header Cap (Interlocking Top Cap) */}
+      {/* Dark Header Cap */}
       <div 
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="interlock-dark-cap flex items-center justify-between cursor-pointer md:cursor-default"
@@ -167,9 +166,9 @@ export const AccountsRecordDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* White Body (100% Full Width Screen Edge Container When Extended) */}
+      {/* True Edge-to-Edge 100% Screen Width Body (No Outer Borders or Encapsulating Margins) */}
       {!isCollapsed && (
-        <div className="interlock-white-body pt-6 px-2 sm:px-5 pb-4 space-y-4 flex-1 flex flex-col w-full animate-fadeIn transition-all duration-300">
+        <div className="w-full pt-4 space-y-4 flex-1 flex flex-col animate-fadeIn transition-all duration-300">
           
           {/* Opportunity Metrics & 3-Tone Donut Chart */}
           <div className="sub-card-white p-4 space-y-3 w-full">
@@ -208,8 +207,8 @@ export const AccountsRecordDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* AI Chat Messages Container (100% Full Screen Width Edge-to-Edge) */}
-          <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/70 p-3 sm:p-4 space-y-3 min-h-[400px] max-h-[500px] w-full overflow-hidden relative shadow-xs">
+          {/* AI Chat Area (Edge-to-Edge 100% Full Width) */}
+          <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/80 p-3 sm:p-4 space-y-3 min-h-[420px] max-h-[520px] w-full overflow-hidden relative">
             
             {/* Scrollable Messages */}
             <div className="flex-1 overflow-y-auto space-y-3 pr-1 w-full">
@@ -286,7 +285,7 @@ export const AccountsRecordDashboard: React.FC = () => {
               <div className="p-3 rounded-xl bg-[#e64a53]/15 border border-[#e64a53]/40 flex items-center justify-between text-xs animate-pulse">
                 <div className="flex items-center gap-2 font-bold text-[#e64a53]">
                   <Mic className="w-4 h-4 animate-bounce" />
-                  <span>Escuchando voz... Transcribiendo al texto ({recordingSeconds}s)</span>
+                  <span>Escuchando voz... ({recordingSeconds}s)</span>
                 </div>
                 <button 
                   type="button"
@@ -321,8 +320,8 @@ export const AccountsRecordDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* WhatsApp Cloned Input Bar: Left (+), Center Text, Right (Mic 🎙️ + Send ➔) */}
-            <form onSubmit={handleSend} className="flex items-center gap-1.5 pt-2 border-t border-gray-200 w-full relative">
+            {/* Input Bar: Left (+), Center Text Input with Inline Dark-Gray Mic 🎙️ Icon, Right Send ➔ */}
+            <form onSubmit={handleSend} className="flex items-center gap-2 pt-2 border-t border-gray-200 w-full relative">
               <input type="file" accept=".pdf" ref={fileInputRef} className="hidden" onChange={(e) => handleFileUpload(e, 'pdf')} />
               <input type="file" accept="image/*" ref={imageInputRef} className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
 
@@ -338,30 +337,32 @@ export const AccountsRecordDashboard: React.FC = () => {
                 <Plus className={`w-5 h-5 transition-transform ${showPlusMenu ? 'rotate-45' : ''}`} />
               </button>
 
-              {/* Center Text Field */}
-              <input
-                type="text"
-                placeholder={isRecording ? "Escuchando voz..." : "Escribe o habla..."}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="flex-1 px-4 py-3 rounded-full bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670] shadow-2xs"
-              />
+              {/* Center Input Field with Inline Dark-Gray Mic 🎙️ Icon inside */}
+              <div className="relative flex-1 flex items-center">
+                <input
+                  type="text"
+                  placeholder={isRecording ? "Escuchando voz..." : "Escribe o habla..."}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  className="w-full pl-4 pr-10 py-3 rounded-full bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670] shadow-2xs"
+                />
 
-              {/* Right WhatsApp Mic 🎙️ Button (Hold/Tap to Dictate Speech into Input Field) */}
-              <button
-                type="button"
-                onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                onTouchStart={startVoiceRecording}
-                onTouchEnd={stopVoiceRecording}
-                onMouseDown={startVoiceRecording}
-                onMouseUp={stopVoiceRecording}
-                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all shadow-sm shrink-0 ${
-                  isRecording ? 'bg-[#e64a53] text-white border-[#e64a53] animate-pulse scale-110' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
-                }`}
-                title="Presiona o mantén para dictar por voz"
-              >
-                <Mic className="w-5 h-5" />
-              </button>
+                {/* Inline Mic Icon Inside the Input Pill */}
+                <button
+                  type="button"
+                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                  onTouchStart={startVoiceRecording}
+                  onTouchEnd={stopVoiceRecording}
+                  onMouseDown={startVoiceRecording}
+                  onMouseUp={stopVoiceRecording}
+                  className={`absolute right-3 p-1 rounded-full transition-all ${
+                    isRecording ? 'text-red-500 animate-pulse scale-110' : 'text-gray-500 hover:text-[#101217]'
+                  }`}
+                  title="Presiona para dictar por voz"
+                >
+                  <Mic className="w-4.5 h-4.5 stroke-[2]" />
+                </button>
+              </div>
 
               {/* Right Send Button ➔ */}
               <button
@@ -374,7 +375,7 @@ export const AccountsRecordDashboard: React.FC = () => {
               </button>
             </form>
 
-            {/* Subtle, Easy-to-click Feedback Button Placed Directly BELOW the Chat Input Field */}
+            {/* Feedback Button Directly BELOW Chat Input Field */}
             <div className="pt-2 text-center">
               <button
                 type="button"
