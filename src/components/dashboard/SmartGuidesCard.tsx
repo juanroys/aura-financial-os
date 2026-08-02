@@ -1,20 +1,26 @@
 import React from 'react';
-import { Settings, Plus, Users, Search, SlidersHorizontal, ChevronDown, Star, Eye } from 'lucide-react';
+import { Target, Plus, Users, Search, SlidersHorizontal, ChevronDown, Star, Eye } from 'lucide-react';
 
 export const SmartGuidesCard: React.FC = () => {
   return (
-    <div className="rounded-[2.2rem] bg-white shadow-sm border border-gray-200/70 overflow-hidden space-y-4">
+    <div className="rounded-[2.2rem] bg-white shadow-sm border border-gray-200/70 overflow-hidden space-y-4 font-jakarta">
       
-      {/* Dark Header Cap with High-Contrast Bottom Curves */}
-      <div className="dark-header-cap px-7 py-4 flex items-center justify-between">
-        <h3 className="text-base font-extrabold text-white tracking-tight">Smart Guides</h3>
+      {/* Dark Header Cap (Matching Reference Image Exact Geometry & Buttons) */}
+      <div className="dark-header-cap px-7 py-4 flex items-center justify-between shadow-md">
+        <h3 className="text-base font-extrabold text-white tracking-tight font-jakarta">Smart Guides</h3>
 
         <div className="flex items-center gap-2">
-          <button className="w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25 transition-all shadow-sm">
-            <Settings className="w-4 h-4" />
+          <button 
+            className="w-8 h-8 rounded-full border border-white/25 bg-transparent text-white flex items-center justify-center hover:bg-white/15 transition-all shadow-2xs"
+            title="Ajustes"
+          >
+            <Target className="w-3.5 h-3.5 stroke-[1.75]" />
           </button>
-          <button className="w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25 transition-all shadow-sm">
-            <Plus className="w-4 h-4" />
+          <button 
+            className="w-8 h-8 rounded-full border border-white/25 bg-transparent text-white flex items-center justify-center hover:bg-white/15 transition-all shadow-2xs"
+            title="Agregar"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[1.75]" />
           </button>
         </div>
       </div>
@@ -22,27 +28,29 @@ export const SmartGuidesCard: React.FC = () => {
       {/* Sub-header Controls Row */}
       <div className="px-7 flex items-center justify-between gap-4 pt-1">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#12161e] text-white flex items-center justify-center shadow-md">
-            <Users className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-full bg-[#101217] text-white flex items-center justify-center shadow-xs">
+            <Users className="w-4 h-4 stroke-[1.75]" />
           </div>
-          <span className="text-sm font-extrabold text-[#12161e]">Contacts (3)</span>
+          <span className="text-sm font-extrabold text-[#101217] tracking-tight">
+            Contacts <span className="font-semibold text-gray-400 text-xs ml-0.5">(3)</span>
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="w-8.5 h-8.5 rounded-full bg-[#f1f2f4] text-gray-700 flex items-center justify-center hover:bg-gray-200 transition-all border border-gray-200/60">
-            <Search className="w-4 h-4 text-gray-600" />
+          <button className="w-8.5 h-8.5 rounded-full border border-gray-300/80 bg-transparent text-gray-700 flex items-center justify-center hover:bg-gray-100 transition-all shadow-2xs">
+            <Search className="w-3.5 h-3.5 text-gray-600 stroke-[1.75]" />
           </button>
-          <button className="w-8.5 h-8.5 rounded-full bg-[#f1f2f4] text-gray-700 flex items-center justify-center hover:bg-gray-200 transition-all border border-gray-200/60">
-            <SlidersHorizontal className="w-4 h-4 text-gray-600" />
+          <button className="w-8.5 h-8.5 rounded-full border border-gray-300/80 bg-transparent text-gray-700 flex items-center justify-center hover:bg-gray-100 transition-all shadow-2xs">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-gray-600 stroke-[1.75]" />
           </button>
-          <button className="px-3.5 py-1.5 rounded-full bg-[#f1f2f4] text-gray-700 text-xs font-semibold flex items-center gap-1.5 hover:bg-gray-200 transition-all border border-gray-200/60">
+          <button className="px-3.5 py-1.5 rounded-full border border-gray-300/80 bg-transparent text-[#101217] font-jakarta font-bold text-xs flex items-center gap-1.5 hover:bg-gray-100 transition-all shadow-2xs">
             <span>Related</span>
-            <ChevronDown className="w-3.5 h-3.5" />
+            <ChevronDown className="w-3.5 h-3.5 stroke-[1.75]" />
           </button>
         </div>
       </div>
 
-      {/* Vibrant Neo-Glow Cards Row (Matching Exact Palette & Geometry from Image) */}
+      {/* Vibrant Neo-Glow Cards Row */}
       <div className="px-7 grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Card 1: Emerald Green (#10D670) */}
@@ -84,7 +92,7 @@ export const SmartGuidesCard: React.FC = () => {
                 className="w-11 h-11 rounded-full object-cover ring-2 ring-black/20 shadow-md"
               />
               <div>
-                <h4 className="text-xs font-extrabold text-[#12161e] leading-tight">Brandon<br />Harvey</h4>
+                <h4 className="text-xs font-extrabold text-[#101217] leading-tight">Brandon<br />Harvey</h4>
               </div>
             </div>
             <Star className="w-4 h-4 text-black/70 fill-black/10" />
@@ -93,11 +101,11 @@ export const SmartGuidesCard: React.FC = () => {
           <div className="mt-4 pt-3 border-t border-black/15 grid grid-cols-2 text-[10px] space-y-0.5">
             <div>
               <span className="opacity-75 block font-medium">Office Phone</span>
-              <strong className="text-[#12161e] font-bold">+ 1 - 487 - 535 - 2016</strong>
+              <strong className="text-[#101217] font-bold">+ 1 - 487 - 535 - 2016</strong>
             </div>
             <div>
               <span className="opacity-75 block font-medium">City</span>
-              <strong className="text-[#12161e] font-bold">Chicago</strong>
+              <strong className="text-[#101217] font-bold">Chicago</strong>
             </div>
           </div>
           <span className="text-[10px] opacity-85 block mt-2 font-medium">Email</span>
@@ -134,10 +142,10 @@ export const SmartGuidesCard: React.FC = () => {
 
       </div>
 
-      {/* Table Section with Glass Transition Overlay */}
+      {/* Table Section */}
       <div className="px-7 pb-6 pt-2 space-y-3 relative">
         <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-          <h4 className="text-xs font-extrabold text-[#12161e]">Calls (1-5 of 6) / Transacciones & Impuestos</h4>
+          <h4 className="text-xs font-extrabold text-[#101217]">Calls (1-5 of 6) / Transacciones & Impuestos</h4>
         </div>
 
         {/* Data Table */}
@@ -157,13 +165,13 @@ export const SmartGuidesCard: React.FC = () => {
             <tbody className="divide-y divide-gray-100 text-gray-700">
               <tr className="hover:bg-gray-50/80 transition-all">
                 <td className="py-3 pl-2"><Star className="w-3.5 h-3.5 text-gray-300" /></td>
-                <td className="py-3 font-bold text-[#12161e]">Left a message</td>
+                <td className="py-3 font-bold text-[#101217]">Left a message</td>
                 <td className="py-3">
                   <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 text-[10px] font-bold">Scheduled</span>
                 </td>
                 <td className="py-3 text-gray-500">2023-10-25 04:55</td>
                 <td className="py-3 text-gray-500">2023-10-25 05:15</td>
-                <td className="py-3 font-medium text-[#12161e]">Jim Brennan</td>
+                <td className="py-3 font-medium text-[#101217]">Jim Brennan</td>
                 <td className="py-3 text-right pr-2">
                   <button className="p-1 rounded hover:bg-gray-200"><Eye className="w-3.5 h-3.5 text-gray-500" /></button>
                 </td>
@@ -171,13 +179,13 @@ export const SmartGuidesCard: React.FC = () => {
 
               <tr className="hover:bg-gray-50/80 transition-all">
                 <td className="py-3 pl-2"><Star className="w-3.5 h-3.5 text-gray-300" /></td>
-                <td className="py-3 font-bold text-[#12161e]">Pago Vercel Cloud Hosting</td>
+                <td className="py-3 font-bold text-[#101217]">Pago Vercel Cloud Hosting</td>
                 <td className="py-3">
                   <span className="px-2.5 py-1 rounded-full bg-[#10d670]/20 text-[#10d670] text-[10px] font-bold">Deducible</span>
                 </td>
                 <td className="py-3 text-gray-500">2026-08-01 10:00</td>
                 <td className="py-3 text-gray-500">2026-08-01 10:15</td>
-                <td className="py-3 font-medium text-[#12161e]">AURA System</td>
+                <td className="py-3 font-medium text-[#101217]">AURA System</td>
                 <td className="py-3 text-right pr-2">
                   <button className="p-1 rounded hover:bg-gray-200"><Eye className="w-3.5 h-3.5 text-gray-500" /></button>
                 </td>
