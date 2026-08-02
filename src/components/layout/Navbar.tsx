@@ -4,17 +4,16 @@ import {
   Home, 
   Calendar, 
   Plus, 
+  Folder, 
   Users, 
-  ClipboardList, 
+  ClipboardCheck, 
   Megaphone, 
-  Target, 
+  Wrench, 
   ShieldCheck, 
   FileText, 
-  Clock, 
+  PieChart, 
   Search, 
-  Bell, 
-  Sparkles,
-  Bot
+  Bell 
 } from 'lucide-react';
 
 export type MainHubTab = 'chat' | 'cashflow' | 'credit' | 'tax';
@@ -25,154 +24,166 @@ interface NavbarProps {
   onOpenQuickAction: () => void;
 }
 
+// 3D Stacked Diamond Cube Logo matching reference image exactly
+const CubeStackedLogo: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+    <path d="M2 12l10 5 10-5-10-5-10 5z" opacity="0.8" />
+    <path d="M2 17l10 5 10-5-10-5-10 5z" opacity="0.6" />
+  </svg>
+);
+
 export const Navbar: React.FC<NavbarProps> = ({ 
-  activeTab, 
+  activeTab,
   setActiveTab, 
   onOpenQuickAction 
 }) => {
   return (
-    <header className="w-full px-6 py-4 flex items-center justify-between gap-4">
+    <header className="w-full px-8 py-5 flex items-center justify-between gap-4 border-b border-gray-200/60">
       
-      {/* Left Brand Logo & Back Circle Button */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 font-black text-lg tracking-tight text-[#0f1218]">
-          <div className="w-6 h-6 rounded bg-[#0f1218] flex items-center justify-center text-white">
-            <Sparkles className="w-3.5 h-3.5 text-[#00e676]" />
-          </div>
-          <span>aura<span className="font-light text-gray-500">financial</span></span>
+      {/* Left: Brand Logo & Standalone Circular Back Arrow Button */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 font-bold text-[#101217]">
+          <CubeStackedLogo className="w-5.5 h-5.5 text-[#101217]" />
+          <span className="tracking-tight text-xl font-extrabold text-[#101217]">sugarcrm</span>
         </div>
 
         <button 
           onClick={() => setActiveTab('cashflow')}
-          className="w-8 h-8 rounded-full bg-white text-gray-700 flex items-center justify-center shadow-sm hover:scale-105 transition-all ml-2"
+          className="w-10 h-10 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center text-[#101217] hover:bg-white transition-all shadow-2xs ml-2"
           title="Regresar"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 stroke-[1.75]" />
         </button>
       </div>
 
-      {/* Floating Center Icon Pill Bar */}
-      <nav className="flex items-center gap-2 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-gray-200/50 overflow-x-auto no-scrollbar">
+      {/* Center: Standalone Floating Circular Buttons (Exact 11 Floating Circles from Reference Image) */}
+      <nav className="flex items-center gap-2 overflow-x-auto no-scrollbar">
         
+        {/* 1. Home */}
         <button 
           onClick={() => setActiveTab('cashflow')}
-          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-            activeTab === 'cashflow' ? 'bg-[#0f1218] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'cashflow' ? 'bg-white/90 text-gray-700 shadow-2xs' : 'bg-white/90 text-gray-700 shadow-2xs'
           }`}
-          title="Resumen Caja & Flujo"
+          title="Home"
         >
-          <Home className="w-4 h-4" />
+          <Home className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 2. Calendar */}
         <button 
           onClick={() => setActiveTab('cashflow')}
-          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
-          title="Calendario de Pagos"
+          className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
+          title="Calendario"
         >
-          <Calendar className="w-4 h-4" />
+          <Calendar className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 3. Plus */}
         <button 
           onClick={onOpenQuickAction}
-          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
           title="Agregar Registro"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 4. Active Module (SOLID BLACK CIRCLE matching image) */}
         <button 
           onClick={() => setActiveTab('chat')}
-          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-            activeTab === 'chat' ? 'bg-[#0f1218] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
-          }`}
-          title="AURA AI Counselor Chat"
+          className="w-10 h-10 rounded-full bg-[#101217] text-white shadow-md hover:scale-105 flex items-center justify-center transition-all"
+          title="Módulo Activo / Chat AI"
         >
-          <Bot className="w-4.5 h-4.5 text-[#00e676]" />
+          <Folder className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 5. Users */}
         <button 
           onClick={() => setActiveTab('credit')}
-          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-            activeTab === 'credit' ? 'bg-[#0f1218] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
-          }`}
-          title="Centro FICO & Crédito"
+          className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
+          title="Cuentas & Crédito"
         >
-          <Users className="w-4 h-4" />
+          <Users className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 6. Clipboard Tasks */}
         <button 
           onClick={() => setActiveTab('tax')}
-          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-            activeTab === 'tax' ? 'bg-[#0f1218] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
-          }`}
-          title="Taxes & Bóveda PDF"
+          className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
+          title="Tareas & Deducibles"
         >
-          <ClipboardList className="w-4 h-4" />
+          <ClipboardCheck className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 7. Megaphone */}
         <button 
           onClick={() => setActiveTab('cashflow')}
-          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
           title="Alertas & Noticias"
         >
-          <Megaphone className="w-4 h-4" />
+          <Megaphone className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 8. Wrench / Tools */}
         <button 
           onClick={() => setActiveTab('credit')}
-          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
-          title="Objetivos & Metas FICO"
+          className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
+          title="Herramientas"
         >
-          <Target className="w-4 h-4" />
+          <Wrench className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 9. Shield Security */}
         <button 
           onClick={() => setActiveTab('tax')}
-          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
-          title="Protección Fiscal IRS/DIAN"
+          className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
+          title="Protección Impuestos"
         >
-          <ShieldCheck className="w-4 h-4" />
+          <ShieldCheck className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 10. File Document */}
         <button 
           onClick={() => setActiveTab('tax')}
-          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
-          title="Documentos OCR"
+          className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
+          title="Documentos PDF"
         >
-          <FileText className="w-4 h-4" />
+          <FileText className="w-4 h-4 stroke-[1.75]" />
         </button>
 
+        {/* 11. Clock / Chart */}
         <button 
           onClick={() => setActiveTab('cashflow')}
-          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
           title="Historial"
         >
-          <Clock className="w-4 h-4" />
+          <PieChart className="w-4 h-4 stroke-[1.75]" />
         </button>
       </nav>
 
-      {/* Right Search, Notification & Avatar */}
-      <div className="flex items-center gap-2.5">
+      {/* Right: Search, Notification Bell with Red Dot & User Avatar */}
+      <div className="flex items-center gap-3">
         <button 
-          className="w-9 h-9 rounded-full bg-white text-gray-700 flex items-center justify-center shadow-sm hover:scale-105 transition-all"
+          className="w-10 h-10 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center text-gray-700 hover:bg-white transition-all shadow-2xs"
           title="Buscar"
         >
-          <Search className="w-4 h-4" />
+          <Search className="w-4 h-4 stroke-[1.75]" />
         </button>
 
         <button 
-          className="relative w-9 h-9 rounded-full bg-white text-gray-700 flex items-center justify-center shadow-sm hover:scale-105 transition-all"
+          className="relative w-10 h-10 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center text-gray-700 hover:bg-white transition-all shadow-2xs"
           title="Notificaciones"
         >
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#ff3b30] ring-2 ring-white" />
+          <Bell className="w-4 h-4 stroke-[1.75]" />
+          <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#ff3b30]" />
         </button>
 
         {/* User Avatar */}
-        <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-white shadow-sm cursor-pointer hover:scale-105 transition-all">
+        <div className="w-10 h-10 rounded-full overflow-hidden shadow-2xs cursor-pointer hover:scale-105 transition-all">
           <img 
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" 
-            alt="Founder Avatar" 
+            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" 
+            alt="User Avatar" 
             className="w-full h-full object-cover"
           />
         </div>
