@@ -5,19 +5,13 @@ export class AIController {
   static async generateAdvice(req, res) {
     try {
       const { userMessage, contextData } = req.body;
-      if (!userMessage) {
+      if (!userMessage || !userMessage.trim()) {
         return res.status(400).json({ success: false, error: 'userMessage is required' });
       }
 
-      const lower = userMessage.toLowerCase();
+      const rawMsg = userMessage.trim();
+      const lower = rawMsg.toLowerCase();
       const memory = MemoryModel.getMemory();
-
-      // Check if user is teaching/correcting the AI
-      let learnedNewThing = false;
-      if (lower.includes('prefiero') || lower.includes('no me gusta') || lower.includes('recuerda que') || lower.includes('mi meta es')) {
-        MemoryModel.addPreference(userMessage);
-        learnedNewThing = true;
-      }
 
       let replyText = '';
       let suggestions = [];
@@ -25,43 +19,89 @@ export class AIController {
       let shouldSaveNote = false;
       let noteToSave = '';
 
-      // Deep Contextual Dynamic Synthesis incorporating memory
-      const memorySummary = memory.learnedPreferences.slice(-3).map(p => `• ${p}`).join('\n');
+      // 1. Check if user is teaching, correcting, or giving preferences to the AI
+      if (lower.includes('prefiero') || lower.includes('no me gusta') || lower.includes('recuerda que') || lower.includes('mi meta es') || lower.includes('en adelante')) {
+        MemoryModel.addPreference(rawMsg);
+        replyText = `¡Perfecto! He registrado esta regla en mi memoria permanente en tu VPS:\n\n📌 *"${rawMsg}"*\n\nA partir de este momento la tomaré en cuenta en cada análisis estratégico que hagamos juntos. ¿En qué nos enfocamos ahora?`;
+        suggestions = ['📝 Escribir nota en VPS', '💡 Organizar mi sueldo', '💳 Revisar FICO Score'];
+        
+        return res.json({
+          success: true,
+          reply: replyText,
+          suggestions,
+          actionPayload: { tab: 'chat' },
+          savedNote: false,
+          memoryCount: memory.learnedPreferences.length + 1
+        });
+      }
 
-      if (lower.includes('sueldo') || lower.includes('trabajo') || lower.includes('empleo') || lower.includes('físico') || lower.includes('ingreso')) {
-        replyText = `Entiendo perfectamente la exigencia física y mental de tu jornada. Ese esfuerzo diario es la columna vertebral que financia tu startup.\n\nTeniendo en cuenta tu perfil de Founder y tus reglas aprendidas:\n${memorySummary}\n\nTe propongo esta distribución estratégica para tu próximo cobro:\n1. 🛡️ **25% Reserva Impuestos IRS**: Garantiza tu tranquilidad fiscal.\n2. 💳 **30% Aceleración de Deuda**: Inyección directa a la tarjeta de mayor APR para bajar tu utilización por debajo del 30%.\n3. 🏠 **45% Operación & Supervivencia**: Cubre tus gastos esenciales sin tocar el capital de la empresa.\n\n¿Escribimos este compromiso en tu archivo VPS \`user_notes.md\` para dejarlo fijado?`;
-        suggestions = ['📝 Guardar este acuerdo en VPS', '📊 Ver mi Score FICO', '📉 Simulador de Deudas'];
+      // 2. Check if user explicitly wants to write or define something in the VPS file
+      if (lower.includes('escribe') || lower.includes('guarda en vps') || lower.includes('registra en vps') || lower.includes('crea una nota') || lower.includes('anota en el vps')) {
+        let extractedNote = rawMsg.replace(/(escribe|guarda en vps|registra en vps|crea una nota|anota en el vps|en el vps|que)/gi, '').trim();
+        if (!extractedNote || extractedNote.length < 5) {
+          extractedNote = `Acuerdo definido con el Founder: ${rawMsg}`;
+        }
+        
+        NoteModel.appendNote(extractedNote);
+        replyText = `✓ **Escrito exitosamente en tu VPS** (\`server/data/user_notes.md\`):\n\n> "${extractedNote}"\n\nEste acuerdo ya está grabado en el servidor para que tú o tu equipo lo revisen en cualquier momento. Si necesitas ajustar o corregir algo de lo escrito, solo dímelo y lo modificamos de inmediato.`;
+        suggestions = ['📋 Ver notas del VPS', '💡 Siguiente paso estratégico', '💳 Revisar FICO Score'];
+        
+        return res.json({
+          success: true,
+          reply: replyText,
+          suggestions,
+          actionPayload: { tab: 'chat' },
+          savedNote: true,
+          memoryCount: memory.learnedPreferences.length
+        });
+      }
+
+      // 3. Greetings & Warm Casual Intros
+      const isGreeting = /^(hola|buenas|buenos dias|buenas noches|hey|que tal|saludos|hola aura|hola ai)/i.test(lower);
+      if (isGreeting && lower.length < 25) {
+        replyText = `¡Hola! Qué gusto conversar contigo. Estoy aquí contigo 100% activo en tu ecosistema AURA.\n\nComo tu consejero financiero y pair programmer de negocios, dime: ¿en qué nos concentramos hoy?\n\n- **Flujo de Caja**: Distribuir el sueldo de tu jornada física y proteger tu liquidez.\n- **Score FICO**: Aceleración de tarjetas para romper la barrera de los 750 puntos.\n- **Escribir en VPS**: Definir cualquier estrategia para dejarla grabada en tu archivo del servidor.`;
+        suggestions = ['💡 Organizar mi sueldo del trabajo', '💳 Plan para FICO Score 750+', '📝 Escribir un acuerdo en el VPS'];
+        
+        return res.json({
+          success: true,
+          reply: replyText,
+          suggestions,
+          actionPayload: { tab: 'chat' },
+          savedNote: false,
+          memoryCount: memory.learnedPreferences.length
+        });
+      }
+
+      // 4. Physical Salary & Cashflow Strategy
+      if (lower.includes('sueldo') || lower.includes('trabajo') || lower.includes('empleo') || lower.includes('físico') || lower.includes('ingreso') || lower.includes('quincena')) {
+        replyText = `Entiendo perfectamente la exigencia física y mental de tu jornada. Ese esfuerzo diario es la columna vertebral que mantiene en pie y financia tu startup.\n\nTeniendo en cuenta tus reglas en memoria:\n${memory.learnedPreferences.slice(-2).map(p => `• ${p}`).join('\n')}\n\nTe propongo esta distribución clara para tu próximo cobro:\n1. 🛡️ **25% Reserva Impuestos IRS**: Mantén la paz mental con el fisco.\n2. 💳 **35% Aceleración de Deuda**: Inyección directa a la tarjeta de mayor tasa para acelerar tu Score FICO.\n3. 🏠 **40% Operación & Supervivencia**: Cobertura de gastos esenciales.\n\n¿Quieres que escriba este plan de distribución directamente en el archivo \`user_notes.md\` de tu VPS?`;
+        suggestions = ['📝 Escribir este plan en el VPS', '📊 Ver mi Score FICO', '📉 Simulador Avalancha'];
         actionPayload = { tab: 'cashflow' };
-
-        if (lower.includes('guardar') || lower.includes('acuerdo') || lower.includes('escribe')) {
-          shouldSaveNote = true;
-          noteToSave = 'Distribución del sueldo de trabajo físico: 25% Reserva Impuestos, 30% Aceleración de Tarjetas (FICO 750+), 45% Operación y gastos fijos.';
-        }
-      } else if (lower.includes('fico') || lower.includes('crédito') || lower.includes('score') || lower.includes('750')) {
+      }
+      
+      // 5. FICO Score & Debt Acceleration
+      else if (lower.includes('fico') || lower.includes('crédito') || lower.includes('score') || lower.includes('750') || lower.includes('tarjeta')) {
         const score = contextData?.ficoScore || memory.userProfile.targetFico || 685;
-        replyText = `Analizando tu estado crediticio actual (FICO Score: ${score}):\n\nTus aprendizajes en memoria señalan que tu meta es superar los 750 puntos. La palanca más rápida no es pedir más crédito, sino la utilización estratégica:\n\n1. **Reducción de Saldo**: Al bajar la utilización total por debajo del 30% (menos de $2,550 USD), ganarás entre +35 y +50 puntos en 60-90 días.\n2. **Apalancamiento de Capital**: Con FICO > 750 accederás a tarjetas de crédito corporativas al 0% APR durante 12-18 meses para tu startup.\n\n¿Fijamos la meta FICO en tu archivo de notas VPS?`;
-        suggestions = ['💳 Ver Centro FICO', '📝 Guardar meta FICO en VPS', '📊 Simulador Avalancha'];
+        replyText = `Analizando tu estado crediticio actual (FICO Score: ${score}):\n\nTu meta prioritaria es superar los 750 puntos. La palanca clave para lograrlo en los próximos 60-90 días es:\n\n1. **Bajar la Utilización a <30%**: Al abonar agresivamente a tu tarjeta principal, sumarás automáticamente entre +35 y +50 puntos.\n2. **Acceso a Capital 0% APR**: Con FICO > 750 calificarás para tarjetas de crédito corporativas sin intereses durante 12-18 meses para tu startup.\n\n¿Escribimos esta meta FICO en tu archivo de notas del VPS para hacerle seguimiento?`;
+        suggestions = ['💳 Ver Centro FICO', '📝 Escribir meta FICO en VPS', '📉 Simulador Avalancha'];
         actionPayload = { tab: 'credit' };
+      }
 
-        if (lower.includes('guardar') || lower.includes('meta')) {
-          shouldSaveNote = true;
-          noteToSave = `Meta FICO 90 Días: Reducir utilización de tarjetas a <30% para alcanzar 750+ puntos y desbloquear líneas de crédito corporativo al 0% APR.`;
-        }
-      } else if (lower.includes('impuesto') || lower.includes('tax') || lower.includes('irs') || lower.includes('deducible')) {
-        replyText = `En tu estructura como Founder con trabajo físico y startup, la clave del ahorro fiscal radica en la Bóveda de Documentos:\n\n1. **Deducciones Aprobadas**: Cada gasto en servidores (AWS, Vercel), licencias SaaS y herramientas de desarrollo es 100% deducible.\n2. **Escaneo de Facturas**: Sube tus extractos en PDF a la Bóveda o reenvía facturas por correo para registrar el ahorro automáticamente.\n\n¿Quieres abrir la Bóveda de Documentos OCR o simular un escaneo?`;
+      // 6. Tax Deductibles & OCR Vault
+      else if (lower.includes('impuesto') || lower.includes('tax') || lower.includes('irs') || lower.includes('deducible') || lower.includes('factura')) {
+        replyText = `Para un Founder que combina empleo físico con desarrollo de startup, cada gasto operativo en servidores (AWS, Vercel), licencias y equipos es 100% deducible.\n\nPuedes subir tus extractos bancarios en PDF o fotos de recibos a la Bóveda de Documentos. El motor OCR del VPS los leerá y extraerá el ahorro fiscal de forma automática.\n\n¿Abrimos la Bóveda de Documentos PDF o simulamos un escaneo por correo?`;
         suggestions = ['📄 Abrir Bóveda PDF', '⚡ Escanear facturas por correo'];
         actionPayload = { tab: 'tax' };
-      } else {
-        replyText = `Procesando tu consulta: "${userMessage}".\n\n${learnedNewThing ? '🧠 *He guardado tu preferencia en mi memoria persistente del VPS para aplicar en nuestras próximas conversaciones.*\n\n' : ''}Como tu consejero financiero y pair programmer de negocios, mantendré nuestro enfoque en tus pilares activos:\n\n${memorySummary}\n\n¿Hacia dónde quieres que movamos la estrategia ahora?`;
-        suggestions = ['💡 Organizar sueldo del trabajo', '💳 Ver FICO y Deudas', '📝 Escribir nota en VPS'];
+      }
+
+      // 7. General Conversational Fallback (Natural, Empathetic, Non-Robotic)
+      else {
+        replyText = `Te escucho atentamente. Sobre tu mensaje: "${rawMsg}"\n\nComo tu consejero financiero y pair programmer, mi objetivo es asegurarme de que cada movimiento que hagamos fortalezca la liquidez de tu trabajo físico y proteja el futuro de tu startup.\n\nPodemos abordar esto desde tres ángulos:\n1. 💡 **Escribir un acuerdo en el VPS** para fijar ideas y corregirlas juntos.\n2. 💳 **Optimizar deudas o Score FICO** para liberar flujo de caja.\n3. 🛡️ **Asegurar deducciones de impuestos** para tu declaración annual.\n\n¿Hacia dónde prefieres que movamos la conversación ahora?`;
+        suggestions = ['💡 Organizar mi sueldo del trabajo', '💳 Ver Score FICO', '📝 Escribir una nota en el VPS'];
         actionPayload = { tab: 'chat' };
       }
 
-      if (shouldSaveNote && noteToSave) {
-        NoteModel.appendNote(noteToSave);
-      }
-
-      MemoryModel.addInsight(`User: "${userMessage.substring(0, 50)}" -> Response generated.`);
+      MemoryModel.addInsight(`User: "${rawMsg.substring(0, 50)}" -> Dynamic Conversational Response.`);
 
       res.json({
         success: true,
