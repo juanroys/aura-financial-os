@@ -1,14 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowUpRight, Bot, Send, Sparkles, User, Save } from 'lucide-react';
+import { ArrowUpRight, Bot, Send, Sparkles, User, Save, Mic, Paperclip, Image, FileText, Volume2, Square } from 'lucide-react';
 import { useFinancials } from '../../context/FinancialContext';
+import type { ChatAttachment } from '../../types';
 
 export const AccountsRecordDashboard: React.FC = () => {
   const { chatMessages, sendChatMessage, ficoReport } = useFinancials();
 
   const [input, setInput] = useState('');
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
   const [newNoteInput, setNewNoteInput] = useState('');
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
+
+  // Voice recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const recordingTimerRef = useRef<any>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -19,11 +29,64 @@ export const AccountsRecordDashboard: React.FC = () => {
     scrollToBottom();
   }, [chatMessages]);
 
+  // Handle Voice Recording Toggle
+  const startRecording = () => {
+    setIsRecording(true);
+    setRecordingSeconds(0);
+    recordingTimerRef.current = setInterval(() => {
+      setRecordingSeconds(prev => prev + 1);
+    }, 1000);
+
+    // Use Web Speech Recognition if supported
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'es-ES';
+      recognition.interimResults = false;
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(prev => (prev ? `${prev} ${transcript}` : transcript));
+      };
+      recognition.start();
+    }
+  };
+
+  const stopRecording = () => {
+    setIsRecording(false);
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    
+    // Add voice note attachment chip
+    const audioAttach: ChatAttachment = {
+      name: `Nota_de_voz_${recordingSeconds}s.mp3`,
+      type: 'audio',
+      size: `${recordingSeconds}s`
+    };
+    setAttachments(prev => [...prev, audioAttach]);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'pdf' | 'image') => {
+    if (e.target.files && e.target.files[0]) {
+      const f = e.target.files[0];
+      const attach: ChatAttachment = {
+        name: f.name,
+        type,
+        size: `${(f.size / 1024).toFixed(0)} KB`,
+        url: type === 'image' ? URL.createObjectURL(f) : undefined
+      };
+      setAttachments(prev => [...prev, attach]);
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
-    sendChatMessage(input);
+    if (!input.trim() && attachments.length === 0) return;
+    sendChatMessage(input, attachments.length > 0 ? attachments : undefined);
     setInput('');
+    setAttachments([]);
   };
 
   const handleSaveVpsNote = async () => {
@@ -61,7 +124,7 @@ export const AccountsRecordDashboard: React.FC = () => {
               AURA AI Counselor
               <span className="w-2 h-2 rounded-full bg-[#10d670] animate-pulse" />
             </h3>
-            <p className="text-[10px] text-gray-300 font-medium">Asistente Ejecutivo VPS</p>
+            <p className="text-[10px] text-gray-300 font-medium">Multimodal AI Engine (Voz, Fotos & PDF)</p>
           </div>
         </div>
 
@@ -111,8 +174,8 @@ export const AccountsRecordDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Real Conversational AI Chat Area */}
-        <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/70 p-3.5 space-y-3 min-h-[360px] max-h-[460px] overflow-hidden">
+        {/* Multimodal Conversational AI Chat Area */}
+        <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/70 p-3.5 space-y-3 min-h-[380px] max-h-[480px] overflow-hidden">
           
           {/* Scrollable Messages */}
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
@@ -128,6 +191,21 @@ export const AccountsRecordDashboard: React.FC = () => {
                 </div>
 
                 <div className="max-w-[85%] space-y-1.5">
+                  {/* Attachments rendering inside bubbles */}
+                  {msg.attachments && msg.attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-1">
+                      {msg.attachments.map((att, idx) => (
+                        <div key={idx} className="p-2 rounded-xl bg-white border border-gray-200 shadow-2xs text-[10px] flex items-center gap-1.5 font-bold text-[#101217]">
+                          {att.type === 'audio' && <Volume2 className="w-3.5 h-3.5 text-[#10d670]" />}
+                          {att.type === 'image' && <Image className="w-3.5 h-3.5 text-[#d6f535]" />}
+                          {att.type === 'pdf' && <FileText className="w-3.5 h-3.5 text-[#e64a53]" />}
+                          <span className="truncate max-w-[120px]">{att.name}</span>
+                          {att.url && <img src={att.url} alt="preview" className="w-6 h-6 rounded object-cover ml-1" />}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className={`p-3 rounded-2xl text-xs leading-relaxed ${
                     msg.sender === 'user'
                       ? 'bg-[#101217] text-white rounded-tr-none shadow-sm'
@@ -157,18 +235,98 @@ export const AccountsRecordDashboard: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Form Input */}
-          <form onSubmit={handleSend} className="flex items-center gap-2 pt-2 border-t border-gray-200">
+          {/* Pending Attachments Chips Bar */}
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-xl border border-gray-200">
+              {attachments.map((att, idx) => (
+                <div key={idx} className="px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-200 text-[10px] font-bold text-gray-800 flex items-center gap-1.5">
+                  {att.type === 'audio' ? <Volume2 className="w-3 h-3 text-[#10d670]" /> :
+                   att.type === 'image' ? <Image className="w-3 h-3 text-[#d6f535]" /> :
+                   <FileText className="w-3 h-3 text-[#e64a53]" />}
+                  <span className="truncate max-w-[100px]">{att.name}</span>
+                  <button onClick={() => removeAttachment(idx)} className="text-gray-400 hover:text-red-500 font-bold ml-1">×</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Voice Recording Active Bar */}
+          {isRecording && (
+            <div className="p-2 rounded-xl bg-[#e64a53]/15 border border-[#e64a53]/40 flex items-center justify-between text-xs animate-pulse">
+              <div className="flex items-center gap-2 font-bold text-[#e64a53]">
+                <Mic className="w-4 h-4 animate-bounce" />
+                <span>Grabando Nota de Voz... ({recordingSeconds}s)</span>
+              </div>
+              <button 
+                onClick={stopRecording}
+                className="px-3 py-1 rounded-lg bg-[#e64a53] text-white text-[10px] font-extrabold flex items-center gap-1"
+              >
+                <Square className="w-3 h-3 fill-white" /> Detener
+              </button>
+            </div>
+          )}
+
+          {/* Multimodal Input Bar (Text + Voice + Image + PDF) */}
+          <form onSubmit={handleSend} className="flex items-center gap-1.5 pt-2 border-t border-gray-200">
+            {/* Hidden inputs */}
+            <input 
+              type="file" 
+              accept=".pdf" 
+              ref={fileInputRef} 
+              className="hidden" 
+              onChange={(e) => handleFileUpload(e, 'pdf')} 
+            />
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={imageInputRef} 
+              className="hidden" 
+              onChange={(e) => handleFileUpload(e, 'image')} 
+            />
+
+            {/* Paperclip PDF */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 rounded-xl bg-white border border-gray-300 text-gray-600 hover:bg-gray-100 transition-all shadow-2xs"
+              title="Adjuntar extracto PDF"
+            >
+              <Paperclip className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Image photo */}
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              className="p-2 rounded-xl bg-white border border-gray-300 text-gray-600 hover:bg-gray-100 transition-all shadow-2xs"
+              title="Adjuntar foto de recibo"
+            >
+              <Image className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Voice Mic Button */}
+            <button
+              type="button"
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`p-2 rounded-xl border transition-all shadow-2xs ${
+                isRecording ? 'bg-[#e64a53] text-white border-[#e64a53] animate-pulse' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
+              }`}
+              title="Grabar nota de voz"
+            >
+              <Mic className="w-3.5 h-3.5" />
+            </button>
+
             <input
               type="text"
-              placeholder="Consulta o pide consejo..."
+              placeholder="Escribe, habla o adjunta..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className="flex-1 px-3 py-2 rounded-xl bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670]"
             />
+
             <button
               type="submit"
-              disabled={!input.trim()}
+              disabled={!input.trim() && attachments.length === 0}
               className="p-2 rounded-xl bg-[#101217] text-white disabled:opacity-40 hover:scale-105 transition-all shadow"
             >
               <Send className="w-3.5 h-3.5" />

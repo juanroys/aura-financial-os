@@ -131,12 +131,20 @@ export interface FinancialHealthMetrics {
 // NEW AI & FICO TYPES
 export type ChatDockPosition = 'right' | 'left' | 'bottom';
 
+export interface ChatAttachment {
+  name: string;
+  type: 'image' | 'pdf' | 'audio';
+  url?: string;
+  size?: string;
+}
+
 export interface ChatMessage {
   id: string;
   sender: 'user' | 'ai';
   text: string;
   timestamp: string;
   suggestions?: string[];
+  attachments?: ChatAttachment[];
   actionPayload?: {
     tab?: string;
     action?: string;

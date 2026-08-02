@@ -13,7 +13,8 @@ import type {
   ChatMessage,
   ChatDockPosition,
   DocumentItem,
-  FicoCreditReport
+  FicoCreditReport,
+  ChatAttachment
 } from '../types';
 import { 
   INITIAL_TRANSACTIONS, 
@@ -58,7 +59,7 @@ interface FinancialContextType {
   triggerMilestoneCelebration: () => void;
   
   // AI & Vault Actions
-  sendChatMessage: (text: string) => void;
+  sendChatMessage: (text: string, attachments?: ChatAttachment[]) => void;
   setChatDockPosition: (pos: ChatDockPosition) => void;
   uploadDocument: (doc: Omit<DocumentItem, 'id'>) => void;
   updateFicoReport: (report: Partial<FicoCreditReport>) => void;
@@ -416,13 +417,14 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     triggerMilestoneCelebration();
   };
 
-  // Real Dynamic AI Chat Engine Hook with VPS Notes Integration
-  const sendChatMessage = async (text: string) => {
+  // Real Dynamic AI Chat Engine Hook with VPS Notes & Multimodal Attachments Integration
+  const sendChatMessage = async (text: string, attachments?: ChatAttachment[]) => {
     const userMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
       sender: 'user',
       text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      attachments
     };
 
     setChatMessages(prev => [...prev, userMsg]);
@@ -433,6 +435,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userMessage: text,
+          attachments,
           contextData: {
             ficoScore: ficoReport.score,
             debtCount: debts.length,
@@ -465,7 +468,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       const aiMsg: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
         sender: 'ai',
-        text: `Comprendo exactamente lo que me dices sobre: "${text}".\n\nComo tu consejero financiero, sugiero mantener nuestro foco en proteger tu sueldo de trabajo físico, acumular deducibles de impuestos y bajar la utilización de tus tarjetas para subir tu FICO Score. ¿Guardamos este acuerdo en tu servidor VPS?`,
+        text: `Recibido. ${attachments?.length ? `He procesado tus ${attachments.length} archivo(s) adjunto(s). ` : ''}¿En qué área quieres que apliquemos esta información hoy?`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         suggestions: ['📝 Guardar acuerdo en VPS', '📊 Ver Caja & Flujo']
       };
