@@ -2,24 +2,32 @@
 
 @layer base {
   :root {
-    --color-slate-canvas: #46454a;
-    --color-card-bg: #e4e5e8;
-    --color-dark-cap: #12161e;
+    --color-slate-canvas: #3a3b40;
+    --color-card-bg: #e1e2e4;
+    --color-dark-cap: #101217;
     --color-neo-green: #10d670;
     --color-neo-lime: #d6f535;
     --color-neo-red: #e64a53;
-    --color-text-dark: #12161e;
+    --color-text-dark: #101217;
     --color-text-muted: #64748b;
   }
 
   body {
     background-color: var(--color-slate-canvas);
     color: var(--color-text-dark);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     margin: 0;
     -webkit-font-smoothing: antialiased;
   }
+}
+
+.font-jakarta {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+.font-serif-logo {
+  font-family: 'Playfair Display', Georgia, serif;
 }
 
 /* Custom Scrollbar */
@@ -28,16 +36,16 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(18, 22, 30, 0.08);
+  background: rgba(16, 18, 23, 0.08);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(18, 22, 30, 0.25);
+  background: rgba(16, 18, 23, 0.25);
   border-radius: 9999px;
 }
 
-/* Master $50,000+ Executive Design System */
+/* Master $50,000+ Executive Container Frame */
 .master-frame {
-  background: #e4e5e8;
+  background: #e1e2e4;
   border-radius: 2.5rem;
   box-shadow: 
     0 30px 90px rgba(0, 0, 0, 0.45),
@@ -45,13 +53,13 @@
 }
 
 .dark-header-cap {
-  background-color: #12161e;
+  background-color: #101217;
   color: #ffffff;
   border-top-left-radius: 2rem;
   border-top-right-radius: 2rem;
   border-bottom-left-radius: 1.5rem;
   border-bottom-right-radius: 1.5rem;
-  box-shadow: 0 10px 25px rgba(18, 22, 30, 0.25);
+  box-shadow: 0 10px 25px rgba(16, 18, 23, 0.25);
 }
 
 .neo-card-green {
@@ -62,7 +70,7 @@
 
 .neo-card-lime {
   background: linear-gradient(135deg, #d6f535 0%, #b8e314 100%);
-  color: #12161e;
+  color: #101217;
   box-shadow: 0 12px 28px rgba(214, 245, 53, 0.35);
 }
 
@@ -77,37 +85,4 @@
   border-radius: 1.75rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-/* Standalone Pill Button Separation */
-.pill-btn-dark {
-  background-color: #12161e;
-  color: #ffffff;
-  border-radius: 9999px;
-  padding: 0.5rem 1.25rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(18, 22, 30, 0.25);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.pill-btn-dark:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(18, 22, 30, 0.35);
-}
-
-.pill-btn-light {
-  background-color: #ffffff;
-  color: #334155;
-  border: 1px solid #cbd5e1;
-  border-radius: 9999px;
-  padding: 0.5rem 1.25rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.pill-btn-light:hover {
-  background-color: #f8fafc;
-  transform: translateY(-1px);
-  border-color: #94a3b8;
 }
