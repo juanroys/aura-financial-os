@@ -19,6 +19,11 @@ import {
 import { GlobalSearchModal } from '../common/GlobalSearchModal';
 import { NotificationsDrawer } from '../common/NotificationsDrawer';
 import { FounderEditModal } from '../common/FounderEditModal';
+import { FinancialCalendarModal } from '../common/FinancialCalendarModal';
+import { FinancialToolsModal } from '../common/FinancialToolsModal';
+import { AssetProtectionModal } from '../common/AssetProtectionModal';
+import { DocumentVaultModal } from '../common/DocumentVaultModal';
+import { HistoricalAnalyticsDrawer } from '../common/HistoricalAnalyticsDrawer';
 
 export type MainHubTab = 'chat' | 'cashflow' | 'credit' | 'tax';
 
@@ -42,9 +47,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab, 
   onOpenQuickAction 
 }) => {
+  // Modal & Drawer State for ALL 11 Menu Buttons
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const [isProtectionOpen, setIsProtectionOpen] = useState(false);
+  const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   return (
     <>
@@ -69,7 +80,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </div>
 
-        {/* Center: Standalone Floating Circular Buttons (Exact 11 Floating Circles) */}
+        {/* Center: Standalone Floating Circular Buttons (Exact 11 Floating Circles - ALL 100% FUNCTIONAL) */}
         <nav className="flex items-center gap-2 overflow-x-auto no-scrollbar">
           
           {/* 1. Home */}
@@ -78,16 +89,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
               activeTab === 'cashflow' ? 'bg-[#101217] text-white shadow-md' : 'bg-white/90 text-gray-700 shadow-2xs hover:scale-105'
             }`}
-            title="Home / Flujo de Caja"
+            title="1. Home / Flujo de Caja"
           >
             <Home className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 2. Calendar */}
+          {/* 2. Calendar (CORREGIDO - ABRE CALENDARIO INTERACTIVO) */}
           <button 
-            onClick={() => setActiveTab('cashflow')}
+            onClick={() => setIsCalendarOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="Calendario Financiero"
+            title="2. Calendario Financiero (Fechas IRS & Deudas)"
           >
             <Calendar className="w-4 h-4 stroke-[1.75]" />
           </button>
@@ -96,7 +107,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button 
             onClick={onOpenQuickAction}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="Agregar Registro Rápido"
+            title="3. Agregar Registro Rápido"
           >
             <Plus className="w-4 h-4 stroke-[1.75]" />
           </button>
@@ -105,9 +116,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button 
             onClick={() => setActiveTab('chat')}
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-              activeTab === 'chat' ? 'bg-[#101217] text-white shadow-md ring-2 ring-[#10d670]' : 'bg-white/90 text-gray-700 shadow-2xs hover:scale-105'
+              activeTab === 'chat' ? 'bg-[#101217] text-white shadow-md ring-2 ring-[#10d670]' : 'bg-[#101217] text-white shadow-md hover:scale-105'
             }`}
-            title="Módulo Activo / Chat AI Counselor"
+            title="4. Módulo Activo / Chat AI Counselor"
           >
             <Folder className="w-4 h-4 stroke-[1.75]" />
           </button>
@@ -118,7 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
               activeTab === 'credit' ? 'bg-[#101217] text-white shadow-md' : 'bg-white/90 text-gray-700 shadow-2xs hover:scale-105'
             }`}
-            title="Cuentas & Score FICO"
+            title="5. Cuentas & Score FICO"
           >
             <Users className="w-4 h-4 stroke-[1.75]" />
           </button>
@@ -127,7 +138,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button 
             onClick={() => setActiveTab('tax')}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="Tareas & Deducibles Fiscales"
+            title="6. Tareas & Deducibles Fiscales"
           >
             <ClipboardCheck className="w-4 h-4 stroke-[1.75]" />
           </button>
@@ -136,43 +147,43 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button 
             onClick={() => setIsNotificationsOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="Alertas & Noticias Financieras"
+            title="7. Alertas & Noticias Financieras"
           >
             <Megaphone className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 8. Wrench / Tools */}
+          {/* 8. Wrench / Tools (CORREGIDO - ABRE SIMULADORES Y HERRAMIENTAS) */}
           <button 
-            onClick={() => setActiveTab('credit')}
+            onClick={() => setIsToolsOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="Herramientas & Simuladores"
+            title="8. Herramientas & Simuladores Financieros"
           >
             <Wrench className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 9. Shield Security */}
+          {/* 9. Shield Security (ÚLTIMO 3 - CORREGIDO - ABRE PROTECCIÓN DE ACTIVOS) */}
           <button 
-            onClick={() => setActiveTab('tax')}
+            onClick={() => setIsProtectionOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="Protección de Impuestos"
+            title="9. Protección de Activos & Blindaje Fiscal"
           >
             <ShieldCheck className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 10. File Document */}
+          {/* 10. File Document (ÚLTIMO 3 - CORREGIDO - ABRE BÓVEDA OCR PDF) */}
           <button 
-            onClick={() => setActiveTab('tax')}
+            onClick={() => setIsVaultModalOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="Documentos & Bóveda OCR PDF"
+            title="10. Bóveda de Documentos & OCR PDF"
           >
             <FileText className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 11. Clock / Chart */}
+          {/* 11. Clock / Chart (ÚLTIMO 3 - CORREGIDO - ABRE CAJÓN DE AUDITORÍA HISTÓRICA) */}
           <button 
-            onClick={() => setActiveTab('cashflow')}
+            onClick={() => setIsHistoryOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="Historial de Transacciones"
+            title="11. Auditoría Histórica & Registro Analítico"
           >
             <PieChart className="w-4 h-4 stroke-[1.75]" />
           </button>
@@ -213,7 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       </header>
 
-      {/* Interactive Global Modals */}
+      {/* Interactive Global Modals & Drawers */}
       <GlobalSearchModal 
         isOpen={isSearchOpen} 
         onClose={() => setIsSearchOpen(false)} 
@@ -227,6 +238,31 @@ export const Navbar: React.FC<NavbarProps> = ({
       <FounderEditModal 
         isOpen={isProfileModalOpen} 
         onClose={() => setIsProfileModalOpen(false)} 
+      />
+
+      <FinancialCalendarModal 
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+      />
+
+      <FinancialToolsModal 
+        isOpen={isToolsOpen}
+        onClose={() => setIsToolsOpen(false)}
+      />
+
+      <AssetProtectionModal 
+        isOpen={isProtectionOpen}
+        onClose={() => setIsProtectionOpen(false)}
+      />
+
+      <DocumentVaultModal 
+        isOpen={isVaultModalOpen}
+        onClose={() => setIsVaultModalOpen(false)}
+      />
+
+      <HistoricalAnalyticsDrawer 
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
       />
     </>
   );
