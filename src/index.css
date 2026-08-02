@@ -55,32 +55,52 @@
     inset 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 
-.dark-header-cap {
+/* Interlocking Dark Cap & White Body Geometry (Compenetradas) */
+.interlock-dark-cap {
   background-color: #101217;
   color: #ffffff;
   border-top-left-radius: 2.2rem;
   border-top-right-radius: 2.2rem;
   border-bottom-left-radius: 1.75rem;
   border-bottom-right-radius: 1.75rem;
+  padding: 1.25rem 1.75rem 2.25rem 1.75rem;
+  position: relative;
+  z-index: 1;
   box-shadow: 0 10px 25px rgba(16, 18, 23, 0.25);
+}
+
+.interlock-white-body {
+  background-color: #ffffff;
+  border-bottom-left-radius: 2.2rem;
+  border-bottom-right-radius: 2.2rem;
+  border-top-left-radius: 2rem;
+  border-top-right-radius: 2rem;
+  margin-top: -1.35rem; /* Interlocks seamlessly into the dark cap above */
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .neo-card-green {
   background: linear-gradient(135deg, #10d670 0%, #05b85a 100%);
   color: #ffffff;
   box-shadow: 0 12px 28px rgba(16, 214, 112, 0.35);
+  border-radius: 1.5rem;
 }
 
 .neo-card-lime {
   background: linear-gradient(135deg, #d6f535 0%, #b8e314 100%);
   color: #101217;
   box-shadow: 0 12px 28px rgba(214, 245, 53, 0.35);
+  border-radius: 1.5rem;
 }
 
 .neo-card-red {
   background: linear-gradient(135deg, #e64a53 0%, #d12e37 100%);
   color: #ffffff;
   box-shadow: 0 12px 28px rgba(230, 74, 83, 0.35);
+  border-radius: 1.5rem;
 }
 
 .sub-card-white {

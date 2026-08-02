@@ -48,16 +48,16 @@ export const AccountsRecordDashboard: React.FC = () => {
   };
 
   return (
-    <div className="rounded-[2.2rem] bg-white shadow-sm border border-gray-200/70 overflow-hidden space-y-4 flex flex-col h-full">
+    <div className="flex flex-col relative w-full h-full font-jakarta">
       
-      {/* Dark Header Cap (Matching Reference Image) */}
-      <div className="dark-header-cap px-6 py-4 flex items-center justify-between">
+      {/* Dark Header Cap (Interlocking Top) */}
+      <div className="interlock-dark-cap flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-[#10d670]/20 border border-[#10d670]/40 flex items-center justify-center">
             <Bot className="w-4.5 h-4.5 text-[#10d670]" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-white tracking-tight flex items-center gap-1.5">
+            <h3 className="text-sm font-extrabold text-white tracking-tight flex items-center gap-1.5 font-jakarta">
               AURA AI Counselor
               <span className="w-2 h-2 rounded-full bg-[#10d670] animate-pulse" />
             </h3>
@@ -65,17 +65,18 @@ export const AccountsRecordDashboard: React.FC = () => {
           </div>
         </div>
 
-        <button className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all">
-          <ArrowUpRight className="w-4 h-4" />
+        <button className="w-8 h-8 rounded-full border border-white/25 bg-transparent text-white flex items-center justify-center hover:bg-white/15 transition-all shadow-2xs">
+          <ArrowUpRight className="w-4 h-4 stroke-[1.75]" />
         </button>
       </div>
 
-      <div className="px-6 pb-6 space-y-4 flex-1 flex flex-col">
+      {/* White Body (Interlocking Concave Entry into Dark Cap) */}
+      <div className="interlock-white-body pt-6 px-6 pb-6 space-y-4 flex-1 flex flex-col">
         
-        {/* Opportunity Metrics & 3-Tone Organic Donut Chart Widget (Matching Reference Image) */}
+        {/* Opportunity Metrics & 3-Tone Organic Donut Chart Widget */}
         <div className="sub-card-white p-4.5 space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-[#12161e]">Opportunity Metrics</h4>
+            <h4 className="text-xs font-bold text-[#101217]">Opportunity Metrics</h4>
             <span className="text-[10px] text-gray-400 font-bold">FICO: {ficoReport.score} ({ficoReport.tier})</span>
           </div>
 
@@ -83,11 +84,11 @@ export const AccountsRecordDashboard: React.FC = () => {
             <div className="space-y-1.5 text-xs">
               <div>
                 <span className="text-[9px] text-gray-400 font-medium block">Won</span>
-                <span className="text-sm font-black text-[#12161e]">$ 32,760</span>
+                <span className="text-sm font-black text-[#101217]">$ 32,760</span>
               </div>
               <div>
                 <span className="text-[9px] text-gray-400 font-medium block">Active</span>
-                <span className="text-sm font-black text-[#12161e]">$ 32,760</span>
+                <span className="text-sm font-black text-[#101217]">$ 32,760</span>
               </div>
               <div>
                 <span className="text-[9px] text-gray-400 font-medium block">Lost</span>
@@ -103,7 +104,7 @@ export const AccountsRecordDashboard: React.FC = () => {
                 <path strokeDasharray="20, 100" strokeDashoffset="-75" strokeWidth="4.5" stroke="#e64a53" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl font-black text-[#12161e]">6</span>
+                <span className="text-xl font-black text-[#101217]">6</span>
                 <span className="text-[7px] text-gray-400 font-bold uppercase tracking-wider">Active</span>
               </div>
             </div>
@@ -121,7 +122,7 @@ export const AccountsRecordDashboard: React.FC = () => {
                 className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
               >
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
-                  msg.sender === 'user' ? 'bg-[#12161e] text-white' : 'bg-[#10d670]/20 text-[#10d670] border border-[#10d670]/40'
+                  msg.sender === 'user' ? 'bg-[#101217] text-white' : 'bg-[#10d670]/20 text-[#10d670] border border-[#10d670]/40'
                 }`}>
                   {msg.sender === 'user' ? <User className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
                 </div>
@@ -129,7 +130,7 @@ export const AccountsRecordDashboard: React.FC = () => {
                 <div className="max-w-[85%] space-y-1.5">
                   <div className={`p-3 rounded-2xl text-xs leading-relaxed ${
                     msg.sender === 'user'
-                      ? 'bg-[#12161e] text-white rounded-tr-none shadow-sm'
+                      ? 'bg-[#101217] text-white rounded-tr-none shadow-sm'
                       : 'bg-white text-gray-800 border border-gray-200/80 rounded-tl-none shadow-sm'
                   }`}>
                     {msg.text.split('\n').map((line, idx) => (
@@ -168,7 +169,7 @@ export const AccountsRecordDashboard: React.FC = () => {
             <button
               type="submit"
               disabled={!input.trim()}
-              className="p-2 rounded-xl bg-[#12161e] text-white disabled:opacity-40 hover:scale-105 transition-all shadow"
+              className="p-2 rounded-xl bg-[#101217] text-white disabled:opacity-40 hover:scale-105 transition-all shadow"
             >
               <Send className="w-3.5 h-3.5" />
             </button>
@@ -178,7 +179,7 @@ export const AccountsRecordDashboard: React.FC = () => {
         {/* Quick VPS Note Writing Widget */}
         <div className="p-3 rounded-2xl bg-white border border-gray-200 space-y-2">
           <div className="flex items-center justify-between text-[11px]">
-            <span className="font-bold text-[#12161e] flex items-center gap-1">
+            <span className="font-bold text-[#101217] flex items-center gap-1">
               <Save className="w-3.5 h-3.5 text-[#10d670]" /> Guardar Nota en VPS (`user_notes.md`)
             </span>
             {noteSaved && <span className="text-[#10d670] font-bold text-[10px]">✓ Guardado</span>}
@@ -195,7 +196,7 @@ export const AccountsRecordDashboard: React.FC = () => {
             <button
               onClick={handleSaveVpsNote}
               disabled={!newNoteInput.trim() || isSavingNote}
-              className="px-3 py-1.5 rounded-lg bg-[#12161e] text-white text-[11px] font-bold disabled:opacity-40 hover:bg-black transition-all"
+              className="px-3 py-1.5 rounded-lg bg-[#101217] text-white text-[11px] font-bold disabled:opacity-40 hover:bg-black transition-all"
             >
               {isSavingNote ? '...' : 'Guardar'}
             </button>
