@@ -72,13 +72,13 @@ const INITIAL_CHAT_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-1',
     sender: 'ai',
-    text: 'Hola. Soy AURA, tu Consejero Financiero Personal. Sé lo duro que estás trabajando: sostener tu empleo físico para poder financiar la visión de tu startup requiere un esfuerzo inmenso. No estás solo en este proceso.\n\nEstoy aquí para darte claridad absoluta: organizaremos cada dólar de tu próximo sueldo, protegeremos tus impuestos, eliminaremos las deudas de alto interés y subiremos tu FICO Score a 750+ para darte tranquilidad y libertad. ¿Por dónde empezamos hoy?',
+    text: 'Hola. Soy AURA, tu Consejero Financiero Personal. Sé lo duro que estás trabajando: sostener tu empleo físico para financiar la visión de tu startup requiere una determinación admirable. No estás solo en esta jornada.\n\nHe conectado nuestro chat dinámicamente con tu servidor VPS para respaldar cada acuerdo en nuestro archivo de estrategia. ¿Por dónde empezamos hoy?',
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     suggestions: [
-      '💡 Organizar mi próximo sueldo',
-      '📉 Ver plan para pagar deudas rápidamente',
+      '💡 Organizar sueldo de trabajo físico',
+      '📉 Ver plan de pago de tarjetas',
       '📄 Cargar mi extracto bancario PDF',
-      '💳 Subir mi FICO Score'
+      '💳 Subir mi FICO Score a 750+'
     ]
   }
 ];
@@ -99,22 +99,6 @@ const INITIAL_DOCUMENTS: DocumentItem[] = [
       isDeductible: true,
       summaryText: 'Extracto verificado. Se detectaron 7 movimientos de egreso y 1 depósito principal. 85% de egresos marcados como deducibles de impuestos.'
     }
-  },
-  {
-    id: 'doc-2',
-    fileName: 'Factura_Vercel_AWS_Cloud.pdf',
-    fileType: 'invoice',
-    uploadDate: '2026-07-25',
-    fileSize: '450 KB',
-    parsedStatus: 'parsed',
-    extractedData: {
-      vendorOrClient: 'AWS / Vercel Cloud',
-      totalAmount: 145.00,
-      detectedDate: '2026-07-25',
-      suggestedCategory: 'cloud',
-      isDeductible: true,
-      summaryText: 'Factura electrónica por servicios en la nube para clientes. Gastos 100% elegibles para deducción tributaria.'
-    }
   }
 ];
 
@@ -131,7 +115,7 @@ const INITIAL_FICO: FicoCreditReport = {
   recommendations: [
     'Reduce la utilización de tu Tarjeta Visa Business por debajo del 30% ($2,550 USD máximo) para ganar +35 puntos FICO.',
     'No solicites nuevas tarjetas de crédito personales en los próximos 60 días para evitar indagaciones de crédito.',
-    'Consolida la deuda de la Financiera Impulso usando la estrategia de Pago Avalancha.'
+    'Consolida la deuda usando la estrategia Avalancha.'
   ]
 };
 
@@ -432,8 +416,8 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     triggerMilestoneCelebration();
   };
 
-  // AI Counselor Chat Function
-  const sendChatMessage = (text: string) => {
+  // Real Dynamic AI Chat Engine Hook with VPS Notes Integration
+  const sendChatMessage = async (text: string) => {
     const userMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
       sender: 'user',
@@ -443,47 +427,50 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     setChatMessages(prev => [...prev, userMsg]);
 
-    // Generate intelligent contextual response
-    setTimeout(() => {
-      let aiText = '';
-      let suggestions: string[] = [];
-      let actionPayload: ChatMessage['actionPayload'] = undefined;
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userMessage: text,
+          contextData: {
+            ficoScore: ficoReport.score,
+            debtCount: debts.length,
+            healthScore: computeHealthMetrics().score
+          }
+        })
+      });
 
-      const lower = text.toLowerCase();
-
-      if (lower.includes('sueldo') || lower.includes('trabajo') || lower.includes('empleo')) {
-        aiText = 'Estrategia para el Sueldo de tu Trabajo Físico:\n1. Separa el 25% ($0.25 de cada $1.00) directo al Fondo de Impuestos.\n2. Asigna el 30% a reducir tu Tarjeta Visa (Método Avalancha para eliminar intereses del 24.5%).\n3. Cubre tus gastos de supervivencia fija y guarda el remanente en tu Reserva de Emergencia.\n\nAl proteger tu dinero personal, evitas tener que quemar capital de tu startup.';
-        suggestions = ['Organizar mi próximo ingreso futuro', 'Ver deudas con mayor interés'];
-        actionPayload = { tab: 'future_income' };
-      } else if (lower.includes('fico') || lower.includes('crédito') || lower.includes('score')) {
-        aiText = `Tu Puntaje FICO actual es de ${ficoReport.score} puntos (${ficoReport.tier}).\nTu porcentaje de utilización de tarjetas está en ${ficoReport.creditUtilizationPercent}%.\n\nPara subir a 750+ puntos en 90 días:\n• Paga $1,650 USD adicionales a tu Tarjeta Visa Business para bajar la utilización por debajo del 30%.\n• Esto añadirá aproximadamente +35 puntos a tu reporte y te abrirá líneas de crédito corporativas al 0% APR.`;
-        suggestions = ['Ver Centro FICO & Crédito', 'Simular abono extra a tarjeta'];
-        actionPayload = { tab: 'fico' };
-      } else if (lower.includes('extracto') || lower.includes('pdf') || lower.includes('factura') || lower.includes('bóveda')) {
-        aiText = 'Puedes arrastrar y subir tus extractos bancarios o facturas en formato PDF/Imagen a la Bóveda Inteligente. AURA escaneará el documento, extraerá el proveedor, fecha y monto, y determinará automáticamente si es deducible de impuestos para tu declaración.';
-        suggestions = ['Abrir Bóveda de Documentos', 'Escanear correos de facturas'];
-        actionPayload = { tab: 'vault' };
-      } else if (lower.includes('deuda') || lower.includes('interés') || lower.includes('avalancha')) {
-        aiText = 'Tus deudas suman un saldo total de $' + debts.reduce((sum, d) => sum + d.remainingBalance, 0).toLocaleString() + ' USD.\nTu blanco #1 de ataque debe ser la Tarjeta Visa Business (24.5% APR). Abonando $300 USD extra al mes, serás 100% libre de deudas en 18 meses y ahorrarás más de $1,400 USD en intereses.';
-        suggestions = ['Ver Mapa de Deudas', 'Registrar abono a tarjeta'];
-        actionPayload = { tab: 'debts' };
-      } else {
-        aiText = 'Comprendo perfectamente la presión que sientes. Manejar un trabajo físico exigente y construir una startup al mismo tiempo requiere una estrategia clara. AURA está programada para proteger tu tranquilidad:\n1. Mantén organizados tus deducibles de impuestos para no pagar de más.\n2. Ataca las deudas de alto interés.\n3. Asigna cada dólar antes de que llegue a tu banco.\n\n¿En qué área te gustaría enfocar nuestra atención en este momento?';
-        suggestions = ['Ver Diagnóstico de Salud Financiera', 'Ver Estimador de Taxes', 'Subir Factura PDF'];
-        actionPayload = { tab: 'dashboard' };
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const aiMsg: ChatMessage = {
+            id: `msg-${Date.now() + 1}`,
+            sender: 'ai',
+            text: data.reply,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            suggestions: data.suggestions,
+            actionPayload: data.actionPayload
+          };
+          setChatMessages(prev => [...prev, aiMsg]);
+          return;
+        }
       }
+    } catch (err) {
+      console.warn('Backend AI chat error, using context fallback:', err);
+    }
 
+    // Dynamic Context Fallback
+    setTimeout(() => {
       const aiMsg: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
         sender: 'ai',
-        text: aiText,
+        text: `Comprendo exactamente lo que me dices sobre: "${text}".\n\nComo tu consejero financiero, sugiero mantener nuestro foco en proteger tu sueldo de trabajo físico, acumular deducibles de impuestos y bajar la utilización de tus tarjetas para subir tu FICO Score. ¿Guardamos este acuerdo en tu servidor VPS?`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        suggestions,
-        actionPayload
+        suggestions: ['📝 Guardar acuerdo en VPS', '📊 Ver Caja & Flujo']
       };
-
       setChatMessages(prev => [...prev, aiMsg]);
-    }, 1000);
+    }, 800);
   };
 
   const uploadDocument = (doc: Omit<DocumentItem, 'id'>) => {
