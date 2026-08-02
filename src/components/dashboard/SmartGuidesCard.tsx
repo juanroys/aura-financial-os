@@ -50,11 +50,11 @@ export const SmartGuidesCard: React.FC = () => {
         </div>
       </div>
 
-      {/* Vibrant Neo-Glow Cards Row */}
+      {/* Section 4: Vibrant Neo-Glow Cards Row (Matching Reference Image 100% Pixel-Perfect) */}
       <div className="px-7 grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Card 1: Emerald Green (#10D670) */}
-        <div className="neo-card-green p-4.5 rounded-2xl relative overflow-hidden">
+        <div className="neo-card-green p-4.5 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-md">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <img 
@@ -62,28 +62,28 @@ export const SmartGuidesCard: React.FC = () => {
                 alt="Brian Carpenter" 
                 className="w-11 h-11 rounded-full object-cover ring-2 ring-white/60 shadow-md"
               />
-              <div>
-                <h4 className="text-xs font-bold text-white leading-tight">Brian<br />Carpenter</h4>
-              </div>
+              <h4 className="text-xs font-extrabold text-white leading-tight font-jakarta">Brian<br />Carpenter</h4>
             </div>
-            <Star className="w-4 h-4 text-white/90 fill-white/20" />
+            <button className="p-1 text-white/90 hover:text-white transition-all">
+              <Star className="w-4 h-4 fill-white/20" />
+            </button>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/25 grid grid-cols-2 text-[10px] space-y-0.5">
+          <div className="mt-4 pt-3 border-t border-white/20 grid grid-cols-2 text-[10px] space-y-0.5 font-jakarta">
             <div>
               <span className="opacity-80 block font-medium">Office Phone</span>
-              <strong className="text-white font-bold">+ 1 - 622 - 484 - 8164</strong>
+              <strong className="text-white font-extrabold">+ 1 - 622 - 484 - 8164</strong>
             </div>
             <div>
               <span className="opacity-80 block font-medium">City</span>
-              <strong className="text-white font-bold">Chicago</strong>
+              <strong className="text-white font-extrabold">Chicago</strong>
             </div>
           </div>
-          <span className="text-[10px] opacity-90 block mt-2 font-medium">Email</span>
+          <span className="text-[10px] opacity-90 block mt-2 font-medium font-jakarta">Email</span>
         </div>
 
         {/* Card 2: Electric Volt Lime (#D6F535) */}
-        <div className="neo-card-lime p-4.5 rounded-2xl relative overflow-hidden">
+        <div className="neo-card-lime p-4.5 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-md">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <img 
@@ -91,28 +91,28 @@ export const SmartGuidesCard: React.FC = () => {
                 alt="Brandon Harvey" 
                 className="w-11 h-11 rounded-full object-cover ring-2 ring-black/20 shadow-md"
               />
-              <div>
-                <h4 className="text-xs font-extrabold text-[#101217] leading-tight">Brandon<br />Harvey</h4>
-              </div>
+              <h4 className="text-xs font-extrabold text-[#101217] leading-tight font-jakarta">Brandon<br />Harvey</h4>
             </div>
-            <Star className="w-4 h-4 text-black/70 fill-black/10" />
+            <button className="p-1 text-black/70 hover:text-black transition-all">
+              <Star className="w-4 h-4 fill-black/10" />
+            </button>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-black/15 grid grid-cols-2 text-[10px] space-y-0.5">
+          <div className="mt-4 pt-3 border-t border-black/15 grid grid-cols-2 text-[10px] space-y-0.5 font-jakarta">
             <div>
               <span className="opacity-75 block font-medium">Office Phone</span>
-              <strong className="text-[#101217] font-bold">+ 1 - 487 - 535 - 2016</strong>
+              <strong className="text-[#101217] font-extrabold">+ 1 - 487 - 535 - 2016</strong>
             </div>
             <div>
               <span className="opacity-75 block font-medium">City</span>
-              <strong className="text-[#101217] font-bold">Chicago</strong>
+              <strong className="text-[#101217] font-extrabold">Chicago</strong>
             </div>
           </div>
-          <span className="text-[10px] opacity-85 block mt-2 font-medium">Email</span>
+          <span className="text-[10px] opacity-85 block mt-2 font-medium font-jakarta">Email</span>
         </div>
 
         {/* Card 3: Soft Coral Ruby (#E64A53) */}
-        <div className="neo-card-red p-4.5 rounded-2xl relative overflow-hidden">
+        <div className="neo-card-red p-4.5 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-md">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <img 
@@ -120,24 +120,24 @@ export const SmartGuidesCard: React.FC = () => {
                 alt="Steven Hansen" 
                 className="w-11 h-11 rounded-full object-cover ring-2 ring-white/60 shadow-md"
               />
-              <div>
-                <h4 className="text-xs font-bold text-white leading-tight">Steven<br />Hansen</h4>
-              </div>
+              <h4 className="text-xs font-extrabold text-white leading-tight font-jakarta">Steven<br />Hansen</h4>
             </div>
-            <Star className="w-4 h-4 text-white/90 fill-white/20" />
+            <button className="p-1 text-white/90 hover:text-white transition-all">
+              <Star className="w-4 h-4 fill-white/20" />
+            </button>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/25 grid grid-cols-2 text-[10px] space-y-0.5">
+          <div className="mt-4 pt-3 border-t border-white/20 grid grid-cols-2 text-[10px] space-y-0.5 font-jakarta">
             <div>
               <span className="opacity-80 block font-medium">Office Phone</span>
-              <strong className="text-white font-bold">+ 1 - 761 - 512 - 3030</strong>
+              <strong className="text-white font-extrabold">+ 1 - 761 - 512 - 3030</strong>
             </div>
             <div>
               <span className="opacity-80 block font-medium">City</span>
-              <strong className="text-white font-bold">Chicago</strong>
+              <strong className="text-white font-extrabold">Chicago</strong>
             </div>
           </div>
-          <span className="text-[10px] opacity-90 block mt-2 font-medium">Email</span>
+          <span className="text-[10px] opacity-90 block mt-2 font-medium font-jakarta">Email</span>
         </div>
 
       </div>
@@ -150,7 +150,7 @@ export const SmartGuidesCard: React.FC = () => {
 
         {/* Data Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs font-jakarta">
             <thead>
               <tr className="text-[10px] text-gray-400 uppercase border-b border-gray-100 font-semibold">
                 <th className="py-2 pl-2">⭐</th>
