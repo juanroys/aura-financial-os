@@ -1,4 +1,5 @@
 import { NoteModel } from '../models/NoteModel.js';
+import { MemoryModel } from '../models/MemoryModel.js';
 
 export class AIController {
   static async generateAdvice(req, res) {
@@ -9,69 +10,78 @@ export class AIController {
       }
 
       const lower = userMessage.toLowerCase();
+      const memory = MemoryModel.getMemory();
+
+      // Check if user is teaching/correcting the AI
+      let learnedNewThing = false;
+      if (lower.includes('prefiero') || lower.includes('no me gusta') || lower.includes('recuerda que') || lower.includes('mi meta es')) {
+        MemoryModel.addPreference(userMessage);
+        learnedNewThing = true;
+      }
+
       let replyText = '';
       let suggestions = [];
       let actionPayload = undefined;
       let shouldSaveNote = false;
       let noteToSave = '';
 
-      // Dynamic Contextual Natural Language Synthesis
-      if (lower.includes('sueldo') || lower.includes('trabajo') || lower.includes('empleo') || lower.includes('viernes') || lower.includes('físico')) {
-        replyText = `Entiendo perfectamente el peso que sientes al terminar una jornada de trabajo físico. Ese esfuerzo es el motor que mantiene con vida tu visión.\n\nPara el sueldo que estás por recibir:\n1. Separa de inmediato el 25% para tu Fondo de Impuestos (tranquilidad fiscal).\n2. Asigna un 30% como abono acelerado a tu Tarjeta Visa Business (interés del 24.5%).\n3. Cubre tus costos esenciales de supervivencia y deja el remanente como amortiguador.\n\n¿Quieres que guarde este plan de distribución en nuestro archivo de estrategia en el VPS para que tu arquitecto pueda revisarlo?`;
-        suggestions = ['📝 Guardar este plan en el VPS', '📉 Ver plan de pago de tarjetas'];
+      // Deep Contextual Dynamic Synthesis incorporating memory
+      const memorySummary = memory.learnedPreferences.slice(-3).map(p => `• ${p}`).join('\n');
+
+      if (lower.includes('sueldo') || lower.includes('trabajo') || lower.includes('empleo') || lower.includes('físico') || lower.includes('ingreso')) {
+        replyText = `Entiendo perfectamente la exigencia física y mental de tu jornada. Ese esfuerzo diario es la columna vertebral que financia tu startup.\n\nTeniendo en cuenta tu perfil de Founder y tus reglas aprendidas:\n${memorySummary}\n\nTe propongo esta distribución estratégica para tu próximo cobro:\n1. 🛡️ **25% Reserva Impuestos IRS**: Garantiza tu tranquilidad fiscal.\n2. 💳 **30% Aceleración de Deuda**: Inyección directa a la tarjeta de mayor APR para bajar tu utilización por debajo del 30%.\n3. 🏠 **45% Operación & Supervivencia**: Cubre tus gastos esenciales sin tocar el capital de la empresa.\n\n¿Escribimos este compromiso en tu archivo VPS \`user_notes.md\` para dejarlo fijado?`;
+        suggestions = ['📝 Guardar este acuerdo en VPS', '📊 Ver mi Score FICO', '📉 Simulador de Deudas'];
         actionPayload = { tab: 'cashflow' };
-        
-        if (lower.includes('guardar') || lower.includes('registra') || lower.includes('escribe')) {
+
+        if (lower.includes('guardar') || lower.includes('acuerdo') || lower.includes('escribe')) {
           shouldSaveNote = true;
-          noteToSave = 'Distribución del sueldo de trabajo físico: 25% Fondo de Impuestos, 30% Pago de Tarjeta Visa Business (24.5% APR), Restante a gastos fijos y reserva.';
+          noteToSave = 'Distribución del sueldo de trabajo físico: 25% Reserva Impuestos, 30% Aceleración de Tarjetas (FICO 750+), 45% Operación y gastos fijos.';
         }
       } else if (lower.includes('fico') || lower.includes('crédito') || lower.includes('score') || lower.includes('750')) {
-        const score = contextData?.ficoScore || 685;
-        replyText = `Analizando tu historial crediticio actual (FICO Score: ${score}):\n\nTu utilización de crédito se encuentra elevada. El secreto para saltar a 750+ puntos en los próximos 90 días no es pedir más tarjetas, sino bajar la utilización por debajo del 30%.\n\nAl reducir el saldo de tu tarjeta principal a menos de $2,500 USD, tu puntaje subirá automáticamente +35 a +45 puntos, abriéndote puertas a líneas de crédito de capital de trabajo al 0% APR para tu startup.`;
-        suggestions = ['Ver Centro FICO & Crédito', '📝 Guardar meta FICO en VPS'];
+        const score = contextData?.ficoScore || memory.userProfile.targetFico || 685;
+        replyText = `Analizando tu estado crediticio actual (FICO Score: ${score}):\n\nTus aprendizajes en memoria señalan que tu meta es superar los 750 puntos. La palanca más rápida no es pedir más crédito, sino la utilización estratégica:\n\n1. **Reducción de Saldo**: Al bajar la utilización total por debajo del 30% (menos de $2,550 USD), ganarás entre +35 y +50 puntos en 60-90 días.\n2. **Apalancamiento de Capital**: Con FICO > 750 accederás a tarjetas de crédito corporativas al 0% APR durante 12-18 meses para tu startup.\n\n¿Fijamos la meta FICO en tu archivo de notas VPS?`;
+        suggestions = ['💳 Ver Centro FICO', '📝 Guardar meta FICO en VPS', '📊 Simulador Avalancha'];
         actionPayload = { tab: 'credit' };
 
         if (lower.includes('guardar') || lower.includes('meta')) {
           shouldSaveNote = true;
-          noteToSave = `Meta FICO 90 Días: Reducir utilización de tarjetas a <30% para alcanzar 750+ puntos y solicitar crédito de capital de trabajo al 0% APR.`;
+          noteToSave = `Meta FICO 90 Días: Reducir utilización de tarjetas a <30% para alcanzar 750+ puntos y desbloquear líneas de crédito corporativo al 0% APR.`;
         }
-      } else if (lower.includes('extracto') || lower.includes('pdf') || lower.includes('factura') || lower.includes('bóveda')) {
-        replyText = `Puedes subir tus extractos bancarios en PDF o imágenes de facturas directamente a la Bóveda de Documentos. El motor OCR del VPS leerá el archivo real, extraerá montos, fechas y conceptos, y determinará cuáles son deducibles de impuestos para tu declaración anual.`;
-        suggestions = ['Abrir Bóveda PDF', 'Escanear recibos por correo'];
+      } else if (lower.includes('impuesto') || lower.includes('tax') || lower.includes('irs') || lower.includes('deducible')) {
+        replyText = `En tu estructura como Founder con trabajo físico y startup, la clave del ahorro fiscal radica en la Bóveda de Documentos:\n\n1. **Deducciones Aprobadas**: Cada gasto en servidores (AWS, Vercel), licencias SaaS y herramientas de desarrollo es 100% deducible.\n2. **Escaneo de Facturas**: Sube tus extractos en PDF a la Bóveda o reenvía facturas por correo para registrar el ahorro automáticamente.\n\n¿Quieres abrir la Bóveda de Documentos OCR o simular un escaneo?`;
+        suggestions = ['📄 Abrir Bóveda PDF', '⚡ Escanear facturas por correo'];
         actionPayload = { tab: 'tax' };
-      } else if (lower.includes('deuda') || lower.includes('interés') || lower.includes('avalancha') || lower.includes('tarjeta')) {
-        replyText = `Tus compromisos actuales están dominados por la tarjeta de crédito de mayor tasa (24.5% APR). El método Avalancha es matemáticamente el más destructivo para las deudas: cada dólar extra abonado ahí elimina intereses futuros directamente.\n\nSi abonamos $300 USD adicionales al mes, serás libre de deudas en 18 meses y ahorrarás más de $1,400 USD.`;
-        suggestions = ['Ver Mapa de Deudas', '📝 Registrar acuerdo de pago en VPS'];
-        actionPayload = { tab: 'credit' };
-
-        if (lower.includes('guardar') || lower.includes('acuerdo')) {
-          shouldSaveNote = true;
-          noteToSave = 'Plan Avalancha de Deudas: Abono adicional de $300 USD/mes priorizado en Tarjeta Visa Business (24.5% APR). Ahorro estimado de $1,400 USD en intereses.';
-        }
-      } else if (lower.includes('crisis') || lower.includes('desorden') || lower.includes('ayuda') || lower.includes('startup')) {
-        replyText = `Mira a tu alrededor: lo que estás haciendo no es fácil, pero es temporal. Trabajar físicamente para impulsar tu propia empresa demuestra la determinación de un gran fundador.\n\nNo intentemos resolver todo de golpe. Nuestro paso #1 hoy es:\n1. Proteger tus ingresos de supervivencia.\n2. Auditar suscripciones innecesarias.\n3. Asegurar tu reserva de impuestos.\n\nEstoy aquí contigo 24/7. Dime qué te preocupa más en este segundo y tomamos el control.`;
-        suggestions = ['💡 Organizar sueldo del trabajo', '💳 Revisar FICO y Deudas', '📝 Escribir nota en VPS'];
-        actionPayload = { tab: 'chat' };
       } else {
-        replyText = `He procesado tu consulta: "${userMessage}".\n\nComo tu consejero financiero, sugiero mantener nuestra estrategia enfocado en tres pilares:\n1. Proteger la liquidez de tu trabajo físico.\n2. Minimizar el Burn Rate operativo de tu startup.\n3. Acumular deducibles de impuestos en la Bóveda para maximizar tu ahorro anual.\n\n¿Quieres que profundicemos en alguno de estos puntos o guardemos una nota en tu servidor VPS?`;
-        suggestions = ['💡 Organizar mi sueldo', '💳 Subir FICO Score', '📝 Escribir acuerdo en VPS'];
+        replyText = `Procesando tu consulta: "${userMessage}".\n\n${learnedNewThing ? '🧠 *He guardado tu preferencia en mi memoria persistente del VPS para aplicar en nuestras próximas conversaciones.*\n\n' : ''}Como tu consejero financiero y pair programmer de negocios, mantendré nuestro enfoque en tus pilares activos:\n\n${memorySummary}\n\n¿Hacia dónde quieres que movamos la estrategia ahora?`;
+        suggestions = ['💡 Organizar sueldo del trabajo', '💳 Ver FICO y Deudas', '📝 Escribir nota en VPS'];
         actionPayload = { tab: 'chat' };
       }
 
-      // Automatically append note to user_notes.md if requested
       if (shouldSaveNote && noteToSave) {
         NoteModel.appendNote(noteToSave);
       }
+
+      MemoryModel.addInsight(`User: "${userMessage.substring(0, 50)}" -> Response generated.`);
 
       res.json({
         success: true,
         reply: replyText,
         suggestions,
         actionPayload,
-        savedNote: shouldSaveNote
+        savedNote: shouldSaveNote,
+        memoryCount: memory.learnedPreferences.length
       });
     } catch (err) {
-      console.error('Error in generateAdvice:', err);
+      console.error('Error in AIController:', err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  }
+
+  static async getMemory(req, res) {
+    try {
+      const memory = MemoryModel.getMemory();
+      res.json({ success: true, memory });
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   }
