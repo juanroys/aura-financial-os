@@ -9,7 +9,11 @@ import type {
   AlertItem, 
   TaxSettings, 
   FinancialHealthMetrics,
-  FutureIncomeAllocation
+  FutureIncomeAllocation,
+  ChatMessage,
+  ChatDockPosition,
+  DocumentItem,
+  FicoCreditReport
 } from '../types';
 import { 
   INITIAL_TRANSACTIONS, 
@@ -32,6 +36,12 @@ interface FinancialContextType {
   healthMetrics: FinancialHealthMetrics;
   isScanningEmail: boolean;
   
+  // AI & Vault State
+  chatMessages: ChatMessage[];
+  chatDockPosition: ChatDockPosition;
+  documents: DocumentItem[];
+  ficoReport: FicoCreditReport;
+
   // Actions
   addTransaction: (tx: Omit<Transaction, 'id'>) => void;
   deleteTransaction: (id: string) => void;
@@ -46,11 +56,84 @@ interface FinancialContextType {
   dismissAlert: (id: string) => void;
   simulateEmailScan: () => Promise<void>;
   triggerMilestoneCelebration: () => void;
+  
+  // AI & Vault Actions
+  sendChatMessage: (text: string) => void;
+  setChatDockPosition: (pos: ChatDockPosition) => void;
+  uploadDocument: (doc: Omit<DocumentItem, 'id'>) => void;
+  updateFicoReport: (report: Partial<FicoCreditReport>) => void;
 }
 
 const FinancialContext = createContext<FinancialContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'AURA_FINANCIAL_OS_DATA_V1';
+const LOCAL_STORAGE_KEY = 'AURA_FINANCIAL_OS_DATA_V2';
+
+const INITIAL_CHAT_MESSAGES: ChatMessage[] = [
+  {
+    id: 'msg-1',
+    sender: 'ai',
+    text: 'Hola. Soy AURA, tu Consejero Financiero Personal. Sé lo duro que estás trabajando: sostener tu empleo físico para poder financiar la visión de tu startup requiere un esfuerzo inmenso. No estás solo en este proceso.\n\nEstoy aquí para darte claridad absoluta: organizaremos cada dólar de tu próximo sueldo, protegeremos tus impuestos, eliminaremos las deudas de alto interés y subiremos tu FICO Score a 750+ para darte tranquilidad y libertad. ¿Por dónde empezamos hoy?',
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    suggestions: [
+      '💡 Organizar mi próximo sueldo',
+      '📉 Ver plan para pagar deudas rápidamente',
+      '📄 Cargar mi extracto bancario PDF',
+      '💳 Subir mi FICO Score'
+    ]
+  }
+];
+
+const INITIAL_DOCUMENTS: DocumentItem[] = [
+  {
+    id: 'doc-1',
+    fileName: 'Extracto_Bancario_Julio_2026.pdf',
+    fileType: 'bank_statement',
+    uploadDate: '2026-08-01',
+    fileSize: '1.2 MB',
+    parsedStatus: 'parsed',
+    extractedData: {
+      vendorOrClient: 'Stripe / Cliente Tech Corp',
+      totalAmount: 5500.00,
+      detectedDate: '2026-07-28',
+      suggestedCategory: 'services',
+      isDeductible: true,
+      summaryText: 'Extracto verificado. Se detectaron 7 movimientos de egreso y 1 depósito principal. 85% de egresos marcados como deducibles de impuestos.'
+    }
+  },
+  {
+    id: 'doc-2',
+    fileName: 'Factura_Vercel_AWS_Cloud.pdf',
+    fileType: 'invoice',
+    uploadDate: '2026-07-25',
+    fileSize: '450 KB',
+    parsedStatus: 'parsed',
+    extractedData: {
+      vendorOrClient: 'AWS / Vercel Cloud',
+      totalAmount: 145.00,
+      detectedDate: '2026-07-25',
+      suggestedCategory: 'cloud',
+      isDeductible: true,
+      summaryText: 'Factura electrónica por servicios en la nube para clientes. Gastos 100% elegibles para deducción tributaria.'
+    }
+  }
+];
+
+const INITIAL_FICO: FicoCreditReport = {
+  score: 685,
+  tier: 'Good',
+  lastUpdated: '2026-08-01',
+  creditUtilizationPercent: 42,
+  onTimePaymentPercent: 98,
+  totalCreditLimit: 14500,
+  totalBalanceUsed: 6100,
+  activeInquiries: 2,
+  accountAgeYears: 4,
+  recommendations: [
+    'Reduce la utilización de tu Tarjeta Visa Business por debajo del 30% ($2,550 USD máximo) para ganar +35 puntos FICO.',
+    'No solicites nuevas tarjetas de crédito personales en los próximos 60 días para evitar indagaciones de crédito.',
+    'Consolida la deuda de la Financiera Impulso usando la estrategia de Pago Avalancha.'
+  ]
+};
 
 export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
@@ -88,9 +171,26 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_TAX_SETTINGS;
   });
 
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_chat`);
+    return saved ? JSON.parse(saved) : INITIAL_CHAT_MESSAGES;
+  });
+
+  const [chatDockPosition, setChatDockPosition] = useState<ChatDockPosition>('right');
+
+  const [documents, setDocuments] = useState<DocumentItem[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_docs`);
+    return saved ? JSON.parse(saved) : INITIAL_DOCUMENTS;
+  });
+
+  const [ficoReport, setFicoReport] = useState<FicoCreditReport>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_fico`);
+    return saved ? JSON.parse(saved) : INITIAL_FICO;
+  });
+
   const [isScanningEmail, setIsScanningEmail] = useState(false);
 
-  // Sync with LocalStorage
+  // Sync LocalStorage
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_tx`, JSON.stringify(transactions));
   }, [transactions]);
@@ -119,7 +219,18 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_tax`, JSON.stringify(taxSettings));
   }, [taxSettings]);
 
-  // Compute Health Score dynamically
+  useEffect(() => {
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_chat`, JSON.stringify(chatMessages));
+  }, [chatMessages]);
+
+  useEffect(() => {
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_docs`, JSON.stringify(documents));
+  }, [documents]);
+
+  useEffect(() => {
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_fico`, JSON.stringify(ficoReport));
+  }, [ficoReport]);
+
   const computeHealthMetrics = (): FinancialHealthMetrics => {
     const totalIncome = transactions
       .filter(t => t.type === 'income')
@@ -133,16 +244,13 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       .filter(s => s.status === 'active')
       .reduce((sum, s) => sum + s.monthlyCost, 0);
 
-    // Debt to income ratio (approximate monthly debt payments / estimated monthly income)
     const monthlyDebtPayments = debts.reduce((sum, d) => sum + d.minimumPayment, 0);
     const estimatedMonthlyIncome = totalIncome > 0 ? totalIncome : 5000;
     const debtToIncomeRatio = Math.min(100, Math.round((monthlyDebtPayments / estimatedMonthlyIncome) * 100));
 
-    // Savings rate %
     const netSavings = Math.max(0, totalIncome - totalExpense);
     const savingsRate = totalIncome > 0 ? Math.round((netSavings / totalIncome) * 100) : 15;
 
-    // Tax reserve coverage
     const totalDeductible = transactions
       .filter(t => t.type === 'expense' && t.isDeductible)
       .reduce((sum, t) => sum + t.amount, 0);
@@ -152,8 +260,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       ? Math.min(100, Math.round((taxSettings.taxReservesBalance / estimatedTaxLiability) * 100))
       : 100;
 
-    // Calculation of holistic stability score (0-100)
-    let score = 50; // base score
+    let score = 50;
     if (debtToIncomeRatio < 20) score += 20;
     else if (debtToIncomeRatio < 35) score += 10;
     else score -= 10;
@@ -164,9 +271,8 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     if (taxReserveCoverage >= 80) score += 15;
     else if (taxReserveCoverage >= 50) score += 5;
 
-    // Subscription hygiene bonus
-    const unusedSubsCount = subscriptions.filter(s => s.priceIncreased || s.status === 'cancelling').length;
-    if (unusedSubsCount === 0) score += 5;
+    if (ficoReport.score >= 740) score += 10;
+    else if (ficoReport.score >= 670) score += 5;
 
     const finalScore = Math.min(100, Math.max(10, score));
 
@@ -183,7 +289,9 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       debtToIncomeRatio,
       savingsRate,
       taxReserveCoverage,
-      subscriptionLeakage: totalMonthlySubscriptions
+      subscriptionLeakage: totalMonthlySubscriptions,
+      burnRateMonthly: totalExpense,
+      runwayMonths: netSavings > 0 ? Math.round((netSavings * 6) / totalExpense) : 2
     };
   };
 
@@ -324,6 +432,73 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     triggerMilestoneCelebration();
   };
 
+  // AI Counselor Chat Function
+  const sendChatMessage = (text: string) => {
+    const userMsg: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      sender: 'user',
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setChatMessages(prev => [...prev, userMsg]);
+
+    // Generate intelligent contextual response
+    setTimeout(() => {
+      let aiText = '';
+      let suggestions: string[] = [];
+      let actionPayload: ChatMessage['actionPayload'] = undefined;
+
+      const lower = text.toLowerCase();
+
+      if (lower.includes('sueldo') || lower.includes('trabajo') || lower.includes('empleo')) {
+        aiText = 'Estrategia para el Sueldo de tu Trabajo Físico:\n1. Separa el 25% ($0.25 de cada $1.00) directo al Fondo de Impuestos.\n2. Asigna el 30% a reducir tu Tarjeta Visa (Método Avalancha para eliminar intereses del 24.5%).\n3. Cubre tus gastos de supervivencia fija y guarda el remanente en tu Reserva de Emergencia.\n\nAl proteger tu dinero personal, evitas tener que quemar capital de tu startup.';
+        suggestions = ['Organizar mi próximo ingreso futuro', 'Ver deudas con mayor interés'];
+        actionPayload = { tab: 'future_income' };
+      } else if (lower.includes('fico') || lower.includes('crédito') || lower.includes('score')) {
+        aiText = `Tu Puntaje FICO actual es de ${ficoReport.score} puntos (${ficoReport.tier}).\nTu porcentaje de utilización de tarjetas está en ${ficoReport.creditUtilizationPercent}%.\n\nPara subir a 750+ puntos en 90 días:\n• Paga $1,650 USD adicionales a tu Tarjeta Visa Business para bajar la utilización por debajo del 30%.\n• Esto añadirá aproximadamente +35 puntos a tu reporte y te abrirá líneas de crédito corporativas al 0% APR.`;
+        suggestions = ['Ver Centro FICO & Crédito', 'Simular abono extra a tarjeta'];
+        actionPayload = { tab: 'fico' };
+      } else if (lower.includes('extracto') || lower.includes('pdf') || lower.includes('factura') || lower.includes('bóveda')) {
+        aiText = 'Puedes arrastrar y subir tus extractos bancarios o facturas en formato PDF/Imagen a la Bóveda Inteligente. AURA escaneará el documento, extraerá el proveedor, fecha y monto, y determinará automáticamente si es deducible de impuestos para tu declaración.';
+        suggestions = ['Abrir Bóveda de Documentos', 'Escanear correos de facturas'];
+        actionPayload = { tab: 'vault' };
+      } else if (lower.includes('deuda') || lower.includes('interés') || lower.includes('avalancha')) {
+        aiText = 'Tus deudas suman un saldo total de $' + debts.reduce((sum, d) => sum + d.remainingBalance, 0).toLocaleString() + ' USD.\nTu blanco #1 de ataque debe ser la Tarjeta Visa Business (24.5% APR). Abonando $300 USD extra al mes, serás 100% libre de deudas en 18 meses y ahorrarás más de $1,400 USD en intereses.';
+        suggestions = ['Ver Mapa de Deudas', 'Registrar abono a tarjeta'];
+        actionPayload = { tab: 'debts' };
+      } else {
+        aiText = 'Comprendo perfectamente la presión que sientes. Manejar un trabajo físico exigente y construir una startup al mismo tiempo requiere una estrategia clara. AURA está programada para proteger tu tranquilidad:\n1. Mantén organizados tus deducibles de impuestos para no pagar de más.\n2. Ataca las deudas de alto interés.\n3. Asigna cada dólar antes de que llegue a tu banco.\n\n¿En qué área te gustaría enfocar nuestra atención en este momento?';
+        suggestions = ['Ver Diagnóstico de Salud Financiera', 'Ver Estimador de Taxes', 'Subir Factura PDF'];
+        actionPayload = { tab: 'dashboard' };
+      }
+
+      const aiMsg: ChatMessage = {
+        id: `msg-${Date.now() + 1}`,
+        sender: 'ai',
+        text: aiText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        suggestions,
+        actionPayload
+      };
+
+      setChatMessages(prev => [...prev, aiMsg]);
+    }, 1000);
+  };
+
+  const uploadDocument = (doc: Omit<DocumentItem, 'id'>) => {
+    const newDoc: DocumentItem = {
+      ...doc,
+      id: `doc-${Date.now()}`
+    };
+    setDocuments(prev => [newDoc, ...prev]);
+    triggerMilestoneCelebration();
+  };
+
+  const updateFicoReport = (report: Partial<FicoCreditReport>) => {
+    setFicoReport(prev => ({ ...prev, ...report }));
+  };
+
   const triggerMilestoneCelebration = () => {
     confetti({
       particleCount: 60,
@@ -345,6 +520,10 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
         taxSettings,
         healthMetrics: computeHealthMetrics(),
         isScanningEmail,
+        chatMessages,
+        chatDockPosition,
+        documents,
+        ficoReport,
         addTransaction,
         deleteTransaction,
         addSubscription,
@@ -357,7 +536,11 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
         updateTaxSettings,
         dismissAlert,
         simulateEmailScan,
-        triggerMilestoneCelebration
+        triggerMilestoneCelebration,
+        sendChatMessage,
+        setChatDockPosition,
+        uploadDocument,
+        updateFicoReport
       }}
     >
       {children}

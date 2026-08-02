@@ -16,6 +16,8 @@ export type CategoryType =
   | 'transport' 
   | 'other';
 
+export type IncomeSourceType = 'job_physical' | 'startup_revenue' | 'freelance' | 'investment' | 'other';
+
 export interface Transaction {
   id: string;
   date: string;
@@ -29,6 +31,7 @@ export interface Transaction {
   vendor?: string;
   status: 'completed' | 'pending';
   receiptAttached?: boolean;
+  incomeSourceType?: IncomeSourceType; // Differentiate physical job vs startup
 }
 
 export interface Subscription {
@@ -78,6 +81,7 @@ export interface FutureIncome {
   allocations: FutureIncomeAllocation;
   status: 'planned' | 'allocated' | 'received';
   clientName?: string;
+  incomeSourceType?: IncomeSourceType;
 }
 
 export interface EmailReceipt {
@@ -120,4 +124,53 @@ export interface FinancialHealthMetrics {
   savingsRate: number; // percentage
   taxReserveCoverage: number; // percentage of target
   subscriptionLeakage: number; // monthly unused cost
+  burnRateMonthly: number;
+  runwayMonths: number;
+}
+
+// NEW AI & FICO TYPES
+export type ChatDockPosition = 'right' | 'left' | 'bottom';
+
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'ai';
+  text: string;
+  timestamp: string;
+  suggestions?: string[];
+  actionPayload?: {
+    tab?: string;
+    action?: string;
+    amount?: number;
+  };
+}
+
+export interface DocumentItem {
+  id: string;
+  fileName: string;
+  fileType: 'bank_statement' | 'invoice' | 'tax_document' | 'fico_report' | 'other';
+  uploadDate: string;
+  fileSize: string;
+  parsedStatus: 'pending' | 'parsed' | 'imported';
+  extractedData?: {
+    vendorOrClient?: string;
+    totalAmount?: number;
+    detectedDate?: string;
+    suggestedCategory?: CategoryType;
+    isDeductible?: boolean;
+    detectedFicoScore?: number;
+    summaryText?: string;
+  };
+}
+
+export interface FicoCreditReport {
+  score: number; // 300 - 850
+  tier: 'Poor' | 'Fair' | 'Good' | 'Very Good' | 'Exceptional';
+  lastUpdated: string;
+  creditUtilizationPercent: number; // e.g. 42%
+  onTimePaymentPercent: number; // e.g. 98%
+  totalCreditLimit: number;
+  totalBalanceUsed: number;
+  activeInquiries: number;
+  accountAgeYears: number;
+  recommendations: string[];
 }
