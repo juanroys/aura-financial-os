@@ -36,6 +36,7 @@ app.post('/api/documents/parse', upload.single('file'), DocumentController.parse
 
 // AI Generator Route
 app.post('/api/ai/chat', AIController.generateAdvice);
+app.post('/api/ai/transcribe', upload.single('audio'), AIController.transcribeAudio);
 app.get('/api/ai/memory', AIController.getMemory);
 
 // VPS Notes Routes
