@@ -1,14 +1,21 @@
 import React from 'react';
 import { 
-  Bot, 
-  TrendingUp, 
-  ShieldAlert, 
-  Receipt, 
+  ArrowLeft, 
+  Home, 
+  Calendar, 
   Plus, 
+  Users, 
+  ClipboardList, 
+  Megaphone, 
+  Target, 
+  ShieldCheck, 
+  FileText, 
+  Clock, 
+  Search, 
+  Bell, 
   Sparkles,
-  Award
+  Bot
 } from 'lucide-react';
-import { useFinancials } from '../../context/FinancialContext';
 
 export type MainHubTab = 'chat' | 'cashflow' | 'credit' | 'tax';
 
@@ -23,98 +30,154 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab, 
   onOpenQuickAction 
 }) => {
-  const { healthMetrics, ficoReport } = useFinancials();
-
-  const hubs: { id: MainHubTab; label: string; sub: string; icon: React.FC<{ className?: string }> }[] = [
-    { id: 'chat', label: 'AI Counselor', sub: 'Asistente & VPS Notes', icon: Bot },
-    { id: 'cashflow', label: 'Caja & Flujo', sub: 'Dashboard, Ingresos & Gastos', icon: TrendingUp },
-    { id: 'credit', label: 'Deudas & FICO', sub: 'Plan Avalancha & Score', icon: ShieldAlert },
-    { id: 'tax', label: 'Taxes & Bóveda', sub: 'Declaración & OCR PDF', icon: Receipt },
-  ];
-
   return (
-    <header className="sticky top-4 z-50 px-4 md:px-8 mb-6 pointer-events-auto">
-      <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 vision-glass p-3 rounded-full shadow-2xl">
-        
-        {/* Brand & Health Ring */}
-        <div 
-          onClick={() => setActiveTab('cashflow')} 
-          className="flex items-center gap-3 pl-3 cursor-pointer group"
+    <header className="w-full px-6 py-4 flex items-center justify-between gap-4">
+      
+      {/* Left Brand Logo & Back Circle Button */}
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 font-black text-lg tracking-tight text-[#0f1218]">
+          <div className="w-6 h-6 rounded bg-[#0f1218] flex items-center justify-center text-white">
+            <Sparkles className="w-3.5 h-3.5 text-[#00e676]" />
+          </div>
+          <span>aura<span className="font-light text-gray-500">financial</span></span>
+        </div>
+
+        <button 
+          onClick={() => setActiveTab('cashflow')}
+          className="w-8 h-8 rounded-full bg-white text-gray-700 flex items-center justify-center shadow-sm hover:scale-105 transition-all ml-2"
+          title="Regresar"
         >
-          <div className="relative w-9 h-9 rounded-full flex items-center justify-center bg-gradient-to-tr from-[#7928ca] via-[#00f2fe] to-[#10b981] p-[2px] shadow-[0_0_15px_rgba(0,242,254,0.4)] group-hover:scale-105 transition-all">
-            <div className="w-full h-full bg-[#05060b] rounded-full flex items-center justify-center">
-              <Sparkles className="w-4.5 h-4.5 text-[#00f2fe] animate-pulse" />
-            </div>
-          </div>
-
-          <div className="hidden sm:block">
-            <h1 className="text-sm font-bold tracking-wider text-white flex items-center gap-1.5">
-              AURA <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/10 text-[#00f2fe] border border-white/15">Financial OS</span>
-            </h1>
-          </div>
-        </div>
-
-        {/* Minimalist 4 Primary Hub Pills */}
-        <nav className="flex items-center gap-1.5 bg-black/50 p-1.5 rounded-full border border-white/10 overflow-x-auto max-w-full no-scrollbar">
-          {hubs.map((hub) => {
-            const Icon = hub.icon;
-            const isActive = activeTab === hub.id;
-            return (
-              <button
-                key={hub.id}
-                onClick={() => setActiveTab(hub.id)}
-                className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 whitespace-nowrap ${
-                  isActive
-                    ? 'text-white bg-gradient-to-r from-white/20 to-white/10 shadow-[0_0_20px_rgba(0,242,254,0.3)] border border-white/35 font-bold scale-105'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-[#00f2fe]' : 'text-gray-400'}`} />
-                <div className="text-left">
-                  <span className="block leading-tight">{hub.label}</span>
-                </div>
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Right Status Badges & Quick Action */}
-        <div className="flex items-center gap-2.5 pr-2">
-          
-          {/* FICO Badge */}
-          <div 
-            onClick={() => setActiveTab('credit')}
-            className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium cursor-pointer hover:bg-white/10 transition-all"
-          >
-            <Award className="w-3.5 h-3.5 text-[#00f2fe]" />
-            <span className="text-gray-400">FICO:</span>
-            <span className="font-bold text-[#00f2fe]">{ficoReport.score}</span>
-          </div>
-
-          {/* Health Score Pill */}
-          <div 
-            onClick={() => setActiveTab('cashflow')}
-            className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium cursor-pointer hover:bg-white/10 transition-all"
-          >
-            <span className="text-gray-400">Score:</span>
-            <span className={`font-bold ${
-              healthMetrics.score >= 75 ? 'text-[#10b981]' : healthMetrics.score >= 50 ? 'text-[#f59e0b]' : 'text-[#ff416c]'
-            }`}>
-              {healthMetrics.score}/100
-            </span>
-          </div>
-
-          {/* Quick Action button */}
-          <button
-            onClick={onOpenQuickAction}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-[#00f2fe] via-[#7928ca] to-[#10b981] text-white text-xs font-bold shadow-[0_0_20px_rgba(0,242,254,0.3)] hover:scale-105 transition-all border border-white/30"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Nuevo Registro</span>
-          </button>
-        </div>
-
+          <ArrowLeft className="w-4 h-4" />
+        </button>
       </div>
+
+      {/* Floating Center Icon Pill Bar */}
+      <nav className="flex items-center gap-2 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-gray-200/50 overflow-x-auto no-scrollbar">
+        
+        <button 
+          onClick={() => setActiveTab('cashflow')}
+          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'cashflow' ? 'bg-[#0f1218] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+          }`}
+          title="Resumen Caja & Flujo"
+        >
+          <Home className="w-4 h-4" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('cashflow')}
+          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          title="Calendario de Pagos"
+        >
+          <Calendar className="w-4 h-4" />
+        </button>
+
+        <button 
+          onClick={onOpenQuickAction}
+          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          title="Agregar Registro"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('chat')}
+          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'chat' ? 'bg-[#0f1218] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+          }`}
+          title="AURA AI Counselor Chat"
+        >
+          <Bot className="w-4.5 h-4.5 text-[#00e676]" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('credit')}
+          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'credit' ? 'bg-[#0f1218] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+          }`}
+          title="Centro FICO & Crédito"
+        >
+          <Users className="w-4 h-4" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('tax')}
+          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'tax' ? 'bg-[#0f1218] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+          }`}
+          title="Taxes & Bóveda PDF"
+        >
+          <ClipboardList className="w-4 h-4" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('cashflow')}
+          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          title="Alertas & Noticias"
+        >
+          <Megaphone className="w-4 h-4" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('credit')}
+          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          title="Objetivos & Metas FICO"
+        >
+          <Target className="w-4 h-4" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('tax')}
+          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          title="Protección Fiscal IRS/DIAN"
+        >
+          <ShieldCheck className="w-4 h-4" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('tax')}
+          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          title="Documentos OCR"
+        >
+          <FileText className="w-4 h-4" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('cashflow')}
+          className="w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-all"
+          title="Historial"
+        >
+          <Clock className="w-4 h-4" />
+        </button>
+      </nav>
+
+      {/* Right Search, Notification & Avatar */}
+      <div className="flex items-center gap-2.5">
+        <button 
+          className="w-9 h-9 rounded-full bg-white text-gray-700 flex items-center justify-center shadow-sm hover:scale-105 transition-all"
+          title="Buscar"
+        >
+          <Search className="w-4 h-4" />
+        </button>
+
+        <button 
+          className="relative w-9 h-9 rounded-full bg-white text-gray-700 flex items-center justify-center shadow-sm hover:scale-105 transition-all"
+          title="Notificaciones"
+        >
+          <Bell className="w-4 h-4" />
+          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#ff3b30] ring-2 ring-white" />
+        </button>
+
+        {/* User Avatar */}
+        <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-white shadow-sm cursor-pointer hover:scale-105 transition-all">
+          <img 
+            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" 
+            alt="Founder Avatar" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+
     </header>
   );
 };

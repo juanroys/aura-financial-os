@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { FinancialProvider } from './context/FinancialContext';
-import { BackgroundCanvas } from './components/layout/BackgroundCanvas';
 import { Navbar, type MainHubTab } from './components/layout/Navbar';
 import { QuickActionModal } from './components/common/QuickActionModal';
 
+import { FounderProfileCard } from './components/dashboard/FounderProfileCard';
+import { SmartGuidesCard } from './components/dashboard/SmartGuidesCard';
+import { AccountsRecordDashboard } from './components/dashboard/AccountsRecordDashboard';
+
 import { AICounselorChat } from './components/ai/AICounselorChat';
 import { VpsStrategyNotes } from './components/notes/VpsStrategyNotes';
-import { DashboardView } from './components/dashboard/DashboardView';
 import { DocumentVault } from './components/vault/DocumentVault';
 import { FicoCreditHub } from './components/credit/FicoCreditHub';
-import { FutureIncomePlanner } from './components/income/FutureIncomePlanner';
-import { ExpenseTracker } from './components/expenses/ExpenseTracker';
-import { SubscriptionScanner } from './components/subscriptions/SubscriptionScanner';
 import { DebtCommandCenter } from './components/debts/DebtCommandCenter';
 import { TaxEngine } from './components/tax/TaxEngine';
 
 const MainAppContent: React.FC = () => {
   const [activeHub, setActiveHub] = useState<MainHubTab>('cashflow');
-  const [cashflowSubTab, setCashflowSubTab] = useState<'dashboard' | 'income' | 'expenses' | 'subscriptions'>('dashboard');
-  const [creditSubTab, setCreditSubTab] = useState<'debts' | 'fico'>('debts');
-  const [taxSubTab, setTaxSubTab] = useState<'tax' | 'vault'>('tax');
-
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -38,22 +33,37 @@ const MainAppContent: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative flex flex-col font-sans pb-16 selection:bg-[#00f2fe] selection:text-black">
+    <div className="min-h-screen bg-[#38393e] text-[#101217] font-sans p-4 md:p-8 flex flex-col items-center justify-center selection:bg-[#00e676] selection:text-black">
       
-      {/* Lunar Glow 3D Backdrop */}
-      <BackgroundCanvas />
-
-      {/* Simplified 4-Hub Navbar */}
-      <Navbar 
-        activeTab={activeHub} 
-        setActiveTab={setActiveHub} 
-        onOpenQuickAction={() => setIsQuickActionOpen(true)} 
-      />
-
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 md:px-8 relative z-10 space-y-6">
+      {/* Master $50,000+ Frame Container (Exact Match to Reference Image) */}
+      <div className="master-frame w-full max-w-[1380px] p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
         
-        {/* HUB 1: AI COUNSELOR & VPS NOTES */}
+        {/* Master Circular Top Navigation Bar */}
+        <Navbar 
+          activeTab={activeHub} 
+          setActiveTab={setActiveHub} 
+          onOpenQuickAction={() => setIsQuickActionOpen(true)} 
+        />
+
+        {/* HUB 1: MAIN CASHFLOW DASHBOARD (Cloned 100% from reference layout) */}
+        {activeHub === 'cashflow' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Left 2 Columns: Founder Profile (Top) + Smart Guides Cards (Bottom) */}
+            <div className="lg:col-span-2 space-y-6">
+              <FounderProfileCard />
+              <SmartGuidesCard />
+            </div>
+
+            {/* Right Column: Accounts Record Dashboard */}
+            <div className="lg:col-span-1">
+              <AccountsRecordDashboard />
+            </div>
+
+          </div>
+        )}
+
+        {/* HUB 2: AI COUNSELOR CHAT & VPS NOTES */}
         {activeHub === 'chat' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[680px]">
             <div className="lg:col-span-2">
@@ -72,123 +82,34 @@ const MainAppContent: React.FC = () => {
           </div>
         )}
 
-        {/* HUB 2: CAJA & FLUJO */}
-        {activeHub === 'cashflow' && (
-          <div className="space-y-6">
-            {/* Minimal Sub-navigation Pill */}
-            <div className="flex items-center gap-2 bg-white/5 p-1 rounded-2xl border border-white/10 w-fit mx-auto">
-              <button
-                onClick={() => setCashflowSubTab('dashboard')}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  cashflowSubTab === 'dashboard' ? 'bg-[#00f2fe] text-black shadow-md' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                📊 Resumen
-              </button>
-              <button
-                onClick={() => setCashflowSubTab('income')}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  cashflowSubTab === 'income' ? 'bg-[#00f2fe] text-black shadow-md' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                💸 Ingresos Futuros
-              </button>
-              <button
-                onClick={() => setCashflowSubTab('expenses')}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  cashflowSubTab === 'expenses' ? 'bg-[#00f2fe] text-black shadow-md' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                💳 Gastos
-              </button>
-              <button
-                onClick={() => setCashflowSubTab('subscriptions')}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  cashflowSubTab === 'subscriptions' ? 'bg-[#00f2fe] text-black shadow-md' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                ✉️ Suscripciones
-              </button>
-            </div>
-
-            {cashflowSubTab === 'dashboard' && <DashboardView onNavigateTab={(t) => {
-              if (t === 'future_income') setCashflowSubTab('income');
-              else if (t === 'expenses') setCashflowSubTab('expenses');
-              else if (t === 'subscriptions') setCashflowSubTab('subscriptions');
-            }} />}
-            {cashflowSubTab === 'income' && <FutureIncomePlanner />}
-            {cashflowSubTab === 'expenses' && <ExpenseTracker />}
-            {cashflowSubTab === 'subscriptions' && <SubscriptionScanner />}
-          </div>
-        )}
-
-        {/* HUB 3: DEUDAS & FICO */}
+        {/* HUB 3: DEUDAS & FICO HUB */}
         {activeHub === 'credit' && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-2 bg-white/5 p-1 rounded-2xl border border-white/10 w-fit mx-auto">
-              <button
-                onClick={() => setCreditSubTab('debts')}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  creditSubTab === 'debts' ? 'bg-[#00f2fe] text-black shadow-md' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                📉 Plan Avalancha Deudas
-              </button>
-              <button
-                onClick={() => setCreditSubTab('fico')}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  creditSubTab === 'fico' ? 'bg-[#00f2fe] text-black shadow-md' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                💳 Centro FICO & Crédito
-              </button>
-            </div>
-
-            {creditSubTab === 'debts' && <DebtCommandCenter />}
-            {creditSubTab === 'fico' && <FicoCreditHub />}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <DebtCommandCenter />
+            <FicoCreditHub />
           </div>
         )}
 
-        {/* HUB 4: TAXES & BÓVEDA */}
+        {/* HUB 4: TAXES & BÓVEDA OCR */}
         {activeHub === 'tax' && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-2 bg-white/5 p-1 rounded-2xl border border-white/10 w-fit mx-auto">
-              <button
-                onClick={() => setTaxSubTab('tax')}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  taxSubTab === 'tax' ? 'bg-[#00f2fe] text-black shadow-md' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                🏛️ Declaración Impuestos
-              </button>
-              <button
-                onClick={() => setTaxSubTab('vault')}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  taxSubTab === 'vault' ? 'bg-[#00f2fe] text-black shadow-md' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                📄 Bóveda PDF & OCR
-              </button>
-            </div>
-
-            {taxSubTab === 'tax' && <TaxEngine />}
-            {taxSubTab === 'vault' && <DocumentVault />}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <TaxEngine />
+            <DocumentVault />
           </div>
         )}
 
-      </main>
+        {/* Executive Footer */}
+        <footer className="pt-4 text-center text-xs text-gray-400 border-t border-gray-200/60 font-medium">
+          AURA Financial OS • Architecture $50,000+ Executive UI Clone • Servidor VPS 187.77.3.244
+        </footer>
+
+      </div>
 
       {/* Quick Action Modal */}
       <QuickActionModal 
         isOpen={isQuickActionOpen} 
         onClose={() => setIsQuickActionOpen(false)} 
       />
-
-      <footer className="mt-12 text-center text-xs text-gray-500 relative z-10">
-        <p className="flex items-center justify-center gap-1.5 font-medium">
-          <span>AURA AI Financial OS</span> • <span className="text-[#00f2fe]">Minimalist Vision Architecture</span> • Sincronización VPS en Vivo
-        </p>
-      </footer>
 
     </div>
   );
