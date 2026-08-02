@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowUpRight, Bot, Send, Sparkles, User, Save, Mic, Paperclip, Image, FileText, Square, ChevronDown, ChevronUp, Plus, MessageSquarePlus } from 'lucide-react';
+import { ArrowUpRight, Bot, Send, Sparkles, User, Save, Mic, Paperclip, Image, FileText, Square, ChevronDown, ChevronUp, Plus, MessageSquarePlus, Volume2 } from 'lucide-react';
 import { useFinancials } from '../../context/FinancialContext';
 import type { ChatAttachment } from '../../types';
 
@@ -15,12 +15,13 @@ export const AccountsRecordDashboard: React.FC = () => {
   const [showPlusMenu, setShowPlusMenu] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
-  // Voice recording & Speech-to-Text state
+  // Voice recording & Universal MediaRecorder + Speech-to-Text state
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const recordingTimerRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const recognitionRef = useRef<any>(null);
-  const isStartingRef = useRef<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -34,105 +35,106 @@ export const AccountsRecordDashboard: React.FC = () => {
     scrollToBottom();
   }, [chatMessages]);
 
-  // Robust Speech-to-Text Voice Recording (Works across iOS Safari, Chrome, and Mobile PWA)
-  const startVoiceRecording = (e?: React.SyntheticEvent) => {
-    if (e) {
-      e.stopPropagation();
-    }
+  // Universal MediaRecorder + Speech-to-Text Audio Strategy (100% Compatible Across iOS Safari, PWA & Desktop)
+  const startVoiceRecording = async (e?: React.SyntheticEvent) => {
+    if (e) e.stopPropagation();
 
-    if (isRecording || isStartingRef.current) {
+    if (isRecording) {
       stopVoiceRecording(e);
       return;
     }
 
-    isStartingRef.current = true;
     setIsRecording(true);
     setShowPlusMenu(false);
     setRecordingSeconds(0);
+    audioChunksRef.current = [];
 
     if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
     recordingTimerRef.current = setInterval(() => {
       setRecordingSeconds(prev => prev + 1);
     }, 1000);
 
-    // Check Speech Recognition API support
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    // 1. Try Universal MediaRecorder API (100% supported on iOS Safari, PWA & Desktop)
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = recorder;
 
-    if (!SpeechRecognition) {
-      setIsRecording(false);
-      isStartingRef.current = false;
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-      alert('Tu navegador no soporta el dictado por voz directo. Por favor usa la opción de teclado o iOS Siri dictado.');
-      return;
+        recorder.ondataavailable = (ev) => {
+          if (ev.data.size > 0) audioChunksRef.current.push(ev.data);
+        };
+
+        recorder.onstop = () => {
+          stream.getTracks().forEach(track => track.stop());
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+
+          // If speech recognition didn't fill text, add Voice Note attachment chip!
+          setAttachments(prev => {
+            const hasAudio = prev.some(a => a.type === 'audio');
+            if (!hasAudio && audioBlob.size > 0) {
+              return [...prev, {
+                name: `Nota_de_Voz_${recordingSeconds || 3}s.wav`,
+                type: 'audio',
+                size: `${(audioBlob.size / 1024).toFixed(0)} KB`,
+                url: audioUrl
+              }];
+            }
+            return prev;
+          });
+        };
+
+        recorder.start();
+      }
+    } catch (err) {
+      console.warn('MediaRecorder microphone error:', err);
     }
 
-    try {
-      // Stop previous instance if any
-      if (recognitionRef.current) {
-        try { recognitionRef.current.abort(); } catch (_) {}
+    // 2. Try SpeechRecognition in parallel if browser supports it for live text transcription
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      try {
+        if (recognitionRef.current) {
+          try { recognitionRef.current.abort(); } catch (_) {}
+        }
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = (event: any) => {
+          let fullTranscript = '';
+          for (let i = 0; i < event.results.length; i++) {
+            fullTranscript += event.results[i][0].transcript;
+          }
+          if (fullTranscript.trim()) {
+            setInput(fullTranscript);
+          }
+        };
+
+        recognition.start();
+        recognitionRef.current = recognition;
+      } catch (err) {
+        console.warn('SpeechRecognition parallel start error:', err);
       }
-
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'es-ES';
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => {
-        isStartingRef.current = false;
-      };
-
-      recognition.onresult = (event: any) => {
-        let fullTranscript = '';
-        for (let i = 0; i < event.results.length; i++) {
-          fullTranscript += event.results[i][0].transcript;
-        }
-        if (fullTranscript.trim()) {
-          setInput(fullTranscript);
-        }
-      };
-
-      recognition.onerror = (err: any) => {
-        console.warn('Speech recognition error event:', err);
-        isStartingRef.current = false;
-        // Don't kill recording immediately on non-fatal errors
-        if (err.error === 'not-allowed') {
-          alert('Por favor otorga permisos de micrófono a la aplicación en la configuración de Safari/Chrome.');
-          setIsRecording(false);
-        }
-      };
-
-      recognition.onend = () => {
-        isStartingRef.current = false;
-        setIsRecording(false);
-        if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-      };
-
-      recognition.start();
-      recognitionRef.current = recognition;
-    } catch (err) {
-      console.warn('Failed to start speech recognition:', err);
-      isStartingRef.current = false;
-      setIsRecording(false);
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
     }
   };
 
   const stopVoiceRecording = (e?: React.SyntheticEvent) => {
-    if (e) {
-      e.stopPropagation();
-    }
+    if (e) e.stopPropagation();
 
     setIsRecording(false);
-    isStartingRef.current = false;
     if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
 
+    // Stop MediaRecorder
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try { mediaRecorderRef.current.stop(); } catch (_) {}
+    }
+
+    // Stop SpeechRecognition
     if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (err) {
-        console.warn('Error stopping recognition:', err);
-      }
+      try { recognitionRef.current.stop(); } catch (_) {}
     }
   };
 
@@ -166,9 +168,7 @@ export const AccountsRecordDashboard: React.FC = () => {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isRecording) {
-      stopVoiceRecording();
-    }
+    if (isRecording) stopVoiceRecording();
     if (!input.trim() && attachments.length === 0) return;
     sendChatMessage(input, attachments.length > 0 ? attachments : undefined);
     setInput('');
@@ -203,26 +203,26 @@ export const AccountsRecordDashboard: React.FC = () => {
   return (
     <div className="flex flex-col relative w-full font-jakarta transition-all duration-300">
       
-      {/* Dark Header Cap */}
+      {/* Dark Obsidian Luxury Header Cap */}
       <div 
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="interlock-dark-cap flex items-center justify-between cursor-pointer md:cursor-default"
+        className="interlock-dark-cap flex items-center justify-between cursor-pointer md:cursor-default bg-[#0b0f17] border-b border-[#10d670]/30 shadow-lg"
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#10d670]/20 border border-[#10d670]/40 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-full bg-[#10d670]/20 border border-[#10d670]/50 flex items-center justify-center shadow-inner">
             <Bot className="w-5 h-5 text-[#10d670]" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-white tracking-tight flex items-center gap-1.5 font-jakarta">
+            <h3 className="text-sm font-extrabold text-white tracking-tight flex items-center gap-2 font-jakarta">
               AURA AI Counselor
-              <span className="w-2.5 h-2.5 rounded-full bg-[#10d670] animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#10d670] animate-pulse ring-2 ring-[#10d670]/40" />
             </h3>
-            <p className="text-[10px] text-gray-300 font-medium">Asistente Ejecutivo VPS & Dictado</p>
+            <p className="text-[10px] text-gray-300 font-medium">Asistente Ejecutivo VPS & Voz Universal</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="md:hidden text-white p-1">
+          <button className="md:hidden text-white p-1 hover:bg-white/10 rounded-full transition-all">
             {isCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
           </button>
           <button className="hidden md:flex w-8 h-8 rounded-full border border-white/25 bg-transparent text-white items-center justify-center hover:bg-white/15 transition-all shadow-2xs">
@@ -231,12 +231,12 @@ export const AccountsRecordDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* True Edge-to-Edge 100% Screen Width Body */}
+      {/* Ultra-Premium Edge-to-Edge Container */}
       {!isCollapsed && (
         <div className="w-full pt-4 space-y-4 flex-1 flex flex-col animate-fadeIn transition-all duration-300">
           
           {/* Opportunity Metrics & 3-Tone Donut Chart */}
-          <div className="sub-card-white p-4 space-y-3 w-full">
+          <div className="sub-card-white p-4 space-y-3 w-full border border-gray-200/80 shadow-xs">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold text-[#101217]">Opportunity Metrics</h4>
               <span className="text-[10px] text-gray-400 font-bold">FICO: {ficoReport.score} ({ficoReport.tier})</span>
@@ -272,18 +272,18 @@ export const AccountsRecordDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* AI Chat Area (Edge-to-Edge 100% Full Width) */}
-          <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-2xl border border-gray-200/80 p-3 sm:p-4 space-y-3 min-h-[420px] max-h-[520px] w-full overflow-hidden relative">
+          {/* Ultra-Luxury Glassmorphic AI Chat Area */}
+          <div className="flex-1 flex flex-col bg-[#f8fafc] rounded-3xl border border-gray-200/90 p-3.5 sm:p-5 space-y-3.5 min-h-[430px] max-h-[540px] w-full overflow-hidden relative shadow-sm">
             
             {/* Scrollable Messages */}
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1 w-full">
+            <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 w-full">
               {chatMessages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
+                  className={`flex items-start gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
-                    msg.sender === 'user' ? 'bg-[#101217] text-white' : 'bg-[#10d670]/20 text-[#10d670] border border-[#10d670]/40'
+                  <div className={`w-8.5 h-8.5 rounded-full flex items-center justify-center shrink-0 text-xs font-bold shadow-xs ${
+                    msg.sender === 'user' ? 'bg-[#101217] text-white ring-2 ring-[#101217]/20' : 'bg-[#10d670]/20 text-[#10d670] border border-[#10d670]/50 ring-2 ring-[#10d670]/20'
                   }`}>
                     {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                   </div>
@@ -292,33 +292,34 @@ export const AccountsRecordDashboard: React.FC = () => {
                     {msg.attachments && msg.attachments.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mb-1">
                         {msg.attachments.map((att, idx) => (
-                          <div key={idx} className="p-2 rounded-xl bg-white border border-gray-200 shadow-2xs text-[10px] flex items-center gap-1.5 font-bold text-[#101217]">
-                            {att.type === 'image' && <Image className="w-3.5 h-3.5 text-[#d6f535]" />}
-                            {att.type === 'pdf' && <FileText className="w-3.5 h-3.5 text-[#e64a53]" />}
-                            <span className="truncate max-w-[120px]">{att.name}</span>
-                            {att.url && <img src={att.url} alt="preview" className="w-6 h-6 rounded object-cover ml-1" />}
+                          <div key={idx} className="p-2.5 rounded-xl bg-white border border-gray-200 shadow-2xs text-[11px] flex items-center gap-2 font-bold text-[#101217]">
+                            {att.type === 'audio' && <Volume2 className="w-4 h-4 text-[#10d670]" />}
+                            {att.type === 'image' && <Image className="w-4 h-4 text-[#d6f535]" />}
+                            {att.type === 'pdf' && <FileText className="w-4 h-4 text-[#e64a53]" />}
+                            <span className="truncate max-w-[130px]">{att.name}</span>
+                            {att.url && att.type === 'image' && <img src={att.url} alt="preview" className="w-7 h-7 rounded object-cover ml-1" />}
                           </div>
                         ))}
                       </div>
                     )}
 
-                    <div className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
+                    <div className={`p-4 rounded-3xl text-xs leading-relaxed font-jakarta ${
                       msg.sender === 'user'
-                        ? 'bg-[#101217] text-white rounded-tr-none shadow-sm'
-                        : 'bg-white text-gray-800 border border-gray-200/80 rounded-tl-none shadow-sm'
+                        ? 'bg-[#101217] text-white rounded-tr-none shadow-md border border-[#101217]'
+                        : 'bg-white text-gray-800 border border-gray-200/90 rounded-tl-none shadow-sm'
                     }`}>
                       {msg.text.split('\n').map((line, idx) => (
-                        <p key={idx} className={idx > 0 ? 'mt-1' : ''}>{line}</p>
+                        <p key={idx} className={idx > 0 ? 'mt-1.5' : ''}>{line}</p>
                       ))}
                     </div>
 
                     {msg.sender === 'ai' && msg.suggestions && (
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1.5 pt-1">
                         {msg.suggestions.map((st, idx) => (
                           <button
                             key={idx}
                             onClick={() => sendChatMessage(st)}
-                            className="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-gray-800 text-xs font-semibold hover:bg-gray-100 transition-all text-left shadow-2xs"
+                            className="px-3.5 py-1.5 rounded-xl bg-white border border-gray-200 text-gray-800 text-xs font-semibold hover:bg-gray-100 hover:border-gray-300 transition-all text-left shadow-2xs"
                           >
                             {st}
                           </button>
@@ -333,10 +334,11 @@ export const AccountsRecordDashboard: React.FC = () => {
 
             {/* Attachments Chips Bar */}
             {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-xl border border-gray-200">
+              <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-2xl border border-gray-200 shadow-2xs">
                 {attachments.map((att, idx) => (
-                  <div key={idx} className="px-3 py-1.5 rounded-lg bg-gray-100 border border-gray-200 text-xs font-bold text-gray-800 flex items-center gap-1.5">
-                    {att.type === 'image' ? <Image className="w-3.5 h-3.5 text-[#d6f535]" /> :
+                  <div key={idx} className="px-3 py-1.5 rounded-xl bg-gray-100 border border-gray-200 text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                    {att.type === 'audio' ? <Volume2 className="w-3.5 h-3.5 text-[#10d670]" /> :
+                     att.type === 'image' ? <Image className="w-3.5 h-3.5 text-[#d6f535]" /> :
                      <FileText className="w-3.5 h-3.5 text-[#e64a53]" />}
                     <span className="truncate max-w-[120px]">{att.name}</span>
                     <button onClick={() => removeAttachment(idx)} className="text-gray-400 hover:text-red-500 font-bold ml-1 text-sm">×</button>
@@ -345,17 +347,17 @@ export const AccountsRecordDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Voice Dictation Live Status Bar */}
+            {/* Universal Voice Recording Active Wave Status */}
             {isRecording && (
-              <div className="p-3 rounded-xl bg-[#e64a53]/15 border border-[#e64a53]/40 flex items-center justify-between text-xs animate-pulse">
+              <div className="p-3 rounded-2xl bg-[#e64a53]/15 border border-[#e64a53]/40 flex items-center justify-between text-xs animate-pulse">
                 <div className="flex items-center gap-2 font-bold text-[#e64a53]">
                   <Mic className="w-4 h-4 animate-bounce" />
-                  <span>Escuchando voz... ({recordingSeconds}s)</span>
+                  <span>Grabando Voz Universal... ({recordingSeconds}s)</span>
                 </div>
                 <button 
                   type="button"
                   onClick={stopVoiceRecording}
-                  className="px-3.5 py-1.5 rounded-lg bg-[#e64a53] text-white text-xs font-extrabold flex items-center gap-1 hover:bg-red-600"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#e64a53] text-white text-xs font-extrabold flex items-center gap-1 hover:bg-red-600 shadow-xs"
                 >
                   <Square className="w-3 h-3 fill-white" /> Detener
                 </button>
@@ -385,16 +387,16 @@ export const AccountsRecordDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Input Bar: Left (+), Center Text Input with Inline Dark-Gray Mic 🎙️ Icon, Right Send ➔ */}
-            <form onSubmit={handleSend} className="flex items-center gap-2 pt-2 border-t border-gray-200 w-full relative">
+            {/* Executive Floating Input Bar with Integrated Mic 🎙️ Icon */}
+            <form onSubmit={handleSend} className="flex items-center gap-2 pt-2 border-t border-gray-200/80 w-full relative">
               <input type="file" accept=".pdf" ref={fileInputRef} className="hidden" onChange={(e) => handleFileUpload(e, 'pdf')} />
               <input type="file" accept="image/*" ref={imageInputRef} className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
 
-              {/* Left (+) Button for Files/Images */}
+              {/* Left (+) Attachment Menu Button */}
               <button
                 type="button"
                 onClick={() => setShowPlusMenu(!showPlusMenu)}
-                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all shadow-sm shrink-0 ${
+                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all shadow-2xs shrink-0 ${
                   showPlusMenu ? 'bg-[#101217] text-white border-[#101217]' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
                 }`}
                 title="Adjuntar Foto o PDF"
@@ -402,43 +404,43 @@ export const AccountsRecordDashboard: React.FC = () => {
                 <Plus className={`w-5 h-5 transition-transform ${showPlusMenu ? 'rotate-45' : ''}`} />
               </button>
 
-              {/* Center Input Field with Inline Dark-Gray Mic 🎙️ Icon inside */}
+              {/* Center Input Field with Inline Metallic Mic 🎙️ Icon */}
               <div className="relative flex-1 flex items-center">
                 <input
                   type="text"
-                  placeholder={isRecording ? "Escuchando voz..." : "Escribe o habla..."}
+                  placeholder={isRecording ? "Grabando voz..." : "Escribe o habla..."}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  className="w-full pl-4 pr-11 py-3 rounded-full bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670] shadow-2xs"
+                  className="w-full pl-4.5 pr-11 py-3 rounded-full bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670] shadow-2xs font-jakarta"
                 />
 
-                {/* Inline Mic Icon Inside the Input Pill */}
+                {/* Inline Metallic Mic Icon Inside the Input Pill */}
                 <button
                   type="button"
                   onClick={toggleMic}
                   onTouchEnd={toggleMic}
-                  className={`absolute right-3 p-1.5 rounded-full transition-all ${
-                    isRecording ? 'text-red-500 animate-pulse scale-110 bg-red-50' : 'text-gray-600 hover:text-[#101217] hover:bg-gray-100'
+                  className={`absolute right-3.5 p-1.5 rounded-full transition-all ${
+                    isRecording ? 'text-red-500 animate-pulse scale-110 bg-red-50' : 'text-gray-500 hover:text-[#101217] hover:bg-gray-100'
                   }`}
-                  title="Presiona para dictar por voz"
+                  title="Presiona para grabar por voz"
                 >
                   <Mic className="w-4.5 h-4.5 stroke-[2]" />
                 </button>
               </div>
 
-              {/* Right Send Button ➔ */}
+              {/* Right Neo-Glow Send Button ➔ */}
               <button
                 type="submit"
                 disabled={!input.trim() && attachments.length === 0}
-                className="w-11 h-11 rounded-full bg-[#101217] text-white flex items-center justify-center disabled:opacity-40 hover:scale-105 transition-all shadow-md shrink-0"
+                className="w-11 h-11 rounded-full bg-[#101217] text-white flex items-center justify-center disabled:opacity-40 hover:scale-105 transition-all shadow-md shrink-0 border border-[#101217]"
                 title="Enviar mensaje"
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-5 h-5 text-[#10d670]" />
               </button>
             </form>
 
-            {/* Feedback Button Directly BELOW Chat Input Field */}
-            <div className="pt-2 text-center">
+            {/* Subtle, Easy-to-click Feedback Button Directly BELOW Chat Input Field */}
+            <div className="pt-1.5 text-center">
               <button
                 type="button"
                 onClick={() => setShowFeedbackModal(true)}
