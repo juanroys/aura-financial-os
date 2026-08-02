@@ -35,7 +35,7 @@ export const SmartGuidesCard: React.FC = () => {
       
       {/* Dark Header Cap (Interlocking Top) */}
       <div className="interlock-dark-cap flex items-center justify-between">
-        <h3 className="text-base font-extrabold text-white tracking-tight font-jakarta">Smart Guides</h3>
+        <h3 className="text-sm sm:text-base font-extrabold text-white tracking-tight font-jakarta">Smart Guides</h3>
 
         <div className="flex items-center gap-2">
           <button 
@@ -59,7 +59,7 @@ export const SmartGuidesCard: React.FC = () => {
       <div className="interlock-white-body pt-6 space-y-4">
         
         {/* Sub-header Controls Row */}
-        <div className="px-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="px-4 sm:px-7 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-[#101217] text-white flex items-center justify-center shadow-xs">
               <Users className="w-4 h-4 stroke-[1.75]" />
@@ -71,17 +71,16 @@ export const SmartGuidesCard: React.FC = () => {
 
           {/* Interactive Control Buttons */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Live Search Input Toggle */}
             {showSearchInput ? (
               <div className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full border border-gray-300">
                 <Search className="w-3.5 h-3.5 text-gray-500" />
                 <input
                   type="text"
-                  placeholder="Filtrar llamadas/transacciones..."
+                  placeholder="Filtrar..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
-                  className="bg-transparent text-xs text-[#101217] font-medium focus:outline-none w-36"
+                  className="bg-transparent text-xs text-[#101217] font-medium focus:outline-none w-28 sm:w-36"
                 />
                 <button onClick={() => setShowSearchInput(false)} className="text-gray-400 font-bold hover:text-gray-600">×</button>
               </div>
@@ -95,7 +94,6 @@ export const SmartGuidesCard: React.FC = () => {
               </button>
             )}
 
-            {/* Filter Toggle Button */}
             <button 
               onClick={() => {
                 if (filterStatus === 'all') setFilterStatus('Scheduled');
@@ -105,12 +103,11 @@ export const SmartGuidesCard: React.FC = () => {
               className={`w-8.5 h-8.5 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center transition-all shadow-2xs ${
                 filterStatus !== 'all' ? 'bg-[#101217] text-white border-[#101217]' : 'text-gray-700 hover:bg-gray-100'
               }`}
-              title={`Filtro actual: ${filterStatus}`}
+              title={`Filtro: ${filterStatus}`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5 stroke-[1.75]" />
             </button>
 
-            {/* Related Items Dropdown */}
             <div className="relative">
               <button 
                 onClick={() => setShowRelatedDropdown(!showRelatedDropdown)}
@@ -146,11 +143,11 @@ export const SmartGuidesCard: React.FC = () => {
           </div>
         </div>
 
-        {/* Vibrant Neo-Glow Cards Row (With Interactive Star Toggles) */}
-        <div className="px-7 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Vibrant Neo-Glow Cards Row (Touch Swipeable Horizontal Carousel on Mobile) */}
+        <div className="px-4 sm:px-7 flex md:grid md:grid-cols-3 gap-4 overflow-x-auto snap-x no-scrollbar pb-2">
           
           {/* Card 1: Emerald Green (#10D670) */}
-          <div className="neo-card-green p-4.5 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-md">
+          <div className="neo-card-green p-4 sm:p-4.5 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-md min-w-[80vw] sm:min-w-[260px] md:min-w-0 snap-center shrink-0">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <img 
@@ -179,7 +176,7 @@ export const SmartGuidesCard: React.FC = () => {
           </div>
 
           {/* Card 2: Electric Volt Lime (#D6F535) */}
-          <div className="neo-card-lime p-4.5 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-md">
+          <div className="neo-card-lime p-4 sm:p-4.5 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-md min-w-[80vw] sm:min-w-[260px] md:min-w-0 snap-center shrink-0">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <img 
@@ -208,7 +205,7 @@ export const SmartGuidesCard: React.FC = () => {
           </div>
 
           {/* Card 3: Soft Coral Ruby (#E64A53) */}
-          <div className="neo-card-red p-4.5 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-md">
+          <div className="neo-card-red p-4 sm:p-4.5 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-md min-w-[80vw] sm:min-w-[260px] md:min-w-0 snap-center shrink-0">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <img 
@@ -239,14 +236,13 @@ export const SmartGuidesCard: React.FC = () => {
         </div>
 
         {/* Table Section */}
-        <div className="px-7 pb-6 pt-2 space-y-3 relative">
+        <div className="px-4 sm:px-7 pb-6 pt-2 space-y-3 relative">
           <div className="flex items-center justify-between border-b border-gray-100 pb-2">
             <h4 className="text-xs font-extrabold text-[#101217]">
-              Calls & Transacciones ({filteredTransactions.length}) {filterStatus !== 'all' && `• Filtro: ${filterStatus}`}
+              Calls & Transacciones ({filteredTransactions.length}) {filterStatus !== 'all' && `• ${filterStatus}`}
             </h4>
           </div>
 
-          {/* Data Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-jakarta">
               <thead>
@@ -254,13 +250,12 @@ export const SmartGuidesCard: React.FC = () => {
                   <th className="py-2 pl-2">⭐</th>
                   <th className="py-2">Subject</th>
                   <th className="py-2">Status</th>
-                  <th className="py-2">Fecha</th>
-                  <th className="py-2">Assigned User</th>
+                  <th className="py-2 hidden sm:table-cell">Fecha</th>
                   <th className="py-2 text-right pr-2">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-gray-700">
-                {filteredTransactions.slice(0, 5).map((tx, idx) => (
+                {filteredTransactions.slice(0, 5).map((tx) => (
                   <tr key={tx.id} className="hover:bg-gray-50/80 transition-all">
                     <td className="py-3 pl-2">
                       <button onClick={() => toggleFavorite(tx.id)}>
@@ -270,13 +265,12 @@ export const SmartGuidesCard: React.FC = () => {
                     <td className="py-3 font-bold text-[#101217]">{tx.title}</td>
                     <td className="py-3">
                       {tx.isDeductible ? (
-                        <span className="px-2.5 py-1 rounded-full bg-[#10d670]/20 text-[#10d670] text-[10px] font-bold">Deducible</span>
+                        <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#10d670]/20 text-[#10d670] text-[9px] sm:text-[10px] font-bold">Deducible</span>
                       ) : (
-                        <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 text-[10px] font-bold">Scheduled</span>
+                        <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-gray-100 text-gray-700 text-[9px] sm:text-[10px] font-bold">Scheduled</span>
                       )}
                     </td>
-                    <td className="py-3 text-gray-500">{tx.date}</td>
-                    <td className="py-3 font-medium text-[#101217]">{idx % 2 === 0 ? 'Jim Brennan' : 'AURA System'}</td>
+                    <td className="py-3 text-gray-500 hidden sm:table-cell">{tx.date}</td>
                     <td className="py-3 text-right pr-2">
                       <button 
                         onClick={() => setInspectedTx(tx)}

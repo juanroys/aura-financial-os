@@ -47,7 +47,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab, 
   onOpenQuickAction 
 }) => {
-  // Modal & Drawer State for ALL 11 Menu Buttons
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -59,29 +58,29 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <header className="w-full px-8 py-5 flex items-center justify-between gap-4 border-b border-gray-200/60 font-jakarta">
+      <header className="w-full px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between gap-2 sm:gap-4 border-b border-gray-200/60 font-jakarta">
         
         {/* Left: Brand Logo & Standalone Circular Back Arrow Button */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <div 
             onClick={() => setActiveTab('cashflow')}
             className="flex items-center gap-2 font-bold text-[#101217] cursor-pointer hover:opacity-80 transition-all"
           >
-            <CubeStackedLogo className="w-5.5 h-5.5 text-[#101217]" />
-            <span className="tracking-tight text-xl font-extrabold text-[#101217]">sugarcrm</span>
+            <CubeStackedLogo className="w-5 h-5 sm:w-5.5 sm:h-5.5 text-[#101217]" />
+            <span className="tracking-tight text-lg sm:text-xl font-extrabold text-[#101217]">sugarcrm</span>
           </div>
 
           <button 
             onClick={() => setActiveTab('cashflow')}
-            className="w-10 h-10 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center text-[#101217] hover:bg-white transition-all shadow-2xs ml-2"
+            className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center text-[#101217] hover:bg-white transition-all shadow-2xs ml-1 sm:ml-2"
             title="Regresar al Inicio"
           >
             <ArrowLeft className="w-4 h-4 stroke-[1.75]" />
           </button>
         </div>
 
-        {/* Center: Standalone Floating Circular Buttons (Exact 11 Floating Circles - ALL 100% FUNCTIONAL) */}
-        <nav className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+        {/* Center: Desktop Circular Menu Row (Hidden on mobile, visible on md:flex) */}
+        <nav className="hidden md:flex items-center gap-2 overflow-x-auto no-scrollbar">
           
           {/* 1. Home */}
           <button 
@@ -94,11 +93,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Home className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 2. Calendar (CORREGIDO - ABRE CALENDARIO INTERACTIVO) */}
+          {/* 2. Calendar */}
           <button 
             onClick={() => setIsCalendarOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="2. Calendario Financiero (Fechas IRS & Deudas)"
+            title="2. Calendario Financiero"
           >
             <Calendar className="w-4 h-4 stroke-[1.75]" />
           </button>
@@ -112,7 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Plus className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 4. Active Module (SOLID BLACK CIRCLE matching image) */}
+          {/* 4. Active Module */}
           <button 
             onClick={() => setActiveTab('chat')}
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
@@ -143,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <ClipboardCheck className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 7. Megaphone / Alerts */}
+          {/* 7. Megaphone */}
           <button 
             onClick={() => setIsNotificationsOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
@@ -152,67 +151,76 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Megaphone className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 8. Wrench / Tools (CORREGIDO - ABRE SIMULADORES Y HERRAMIENTAS) */}
+          {/* 8. Wrench */}
           <button 
             onClick={() => setIsToolsOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="8. Herramientas & Simuladores Financieros"
+            title="8. Herramientas & Simuladores"
           >
             <Wrench className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 9. Shield Security (ÚLTIMO 3 - CORREGIDO - ABRE PROTECCIÓN DE ACTIVOS) */}
+          {/* 9. Shield Security */}
           <button 
             onClick={() => setIsProtectionOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="9. Protección de Activos & Blindaje Fiscal"
+            title="9. Protección de Activos"
           >
             <ShieldCheck className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 10. File Document (ÚLTIMO 3 - CORREGIDO - ABRE BÓVEDA OCR PDF) */}
+          {/* 10. File Document */}
           <button 
             onClick={() => setIsVaultModalOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="10. Bóveda de Documentos & OCR PDF"
+            title="10. Bóveda OCR PDF"
           >
             <FileText className="w-4 h-4 stroke-[1.75]" />
           </button>
 
-          {/* 11. Clock / Chart (ÚLTIMO 3 - CORREGIDO - ABRE CAJÓN DE AUDITORÍA HISTÓRICA) */}
+          {/* 11. Clock / Chart */}
           <button 
             onClick={() => setIsHistoryOpen(true)}
             className="w-10 h-10 rounded-full bg-white/90 text-gray-700 shadow-2xs hover:scale-105 hover:bg-white flex items-center justify-center transition-all"
-            title="11. Auditoría Histórica & Registro Analítico"
+            title="11. Auditoría Histórica"
           >
             <PieChart className="w-4 h-4 stroke-[1.75]" />
           </button>
         </nav>
 
-        {/* Right: Search, Notification Bell with Red Dot & User Avatar */}
-        <div className="flex items-center gap-3">
+        {/* Right: Search, Notification Bell & Avatar */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Quick Plus Action for Mobile */}
+          <button
+            onClick={onOpenQuickAction}
+            className="md:hidden w-8.5 h-8.5 rounded-full bg-[#101217] text-white flex items-center justify-center shadow-sm"
+            title="Agregar Registro Rápido"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+
           <button 
             onClick={() => setIsSearchOpen(true)}
-            className="w-10 h-10 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center text-gray-700 hover:bg-white transition-all shadow-2xs"
-            title="Búsqueda Global (Transacciones, Notas, PDF)"
+            className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center text-gray-700 hover:bg-white transition-all shadow-2xs"
+            title="Búsqueda Global"
           >
             <Search className="w-4 h-4 stroke-[1.75]" />
           </button>
 
           <button 
             onClick={() => setIsNotificationsOpen(true)}
-            className="relative w-10 h-10 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center text-gray-700 hover:bg-white transition-all shadow-2xs"
+            className="relative w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-full border border-gray-300/80 bg-transparent flex items-center justify-center text-gray-700 hover:bg-white transition-all shadow-2xs"
             title="Notificaciones en Vivo"
           >
             <Bell className="w-4 h-4 stroke-[1.75]" />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#ff3b30] animate-pulse" />
+            <span className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 w-2 h-2 rounded-full bg-[#ff3b30] animate-pulse" />
           </button>
 
           {/* User Avatar */}
           <div 
             onClick={() => setIsProfileModalOpen(true)}
-            className="w-10 h-10 rounded-full overflow-hidden shadow-2xs cursor-pointer hover:scale-105 transition-all ring-2 ring-[#101217]/20"
-            title="Perfil Executive Founder"
+            className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-full overflow-hidden shadow-2xs cursor-pointer hover:scale-105 transition-all ring-2 ring-[#101217]/20"
+            title="Perfil Founder"
           >
             <img 
               src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" 
@@ -224,46 +232,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       </header>
 
-      {/* Interactive Global Modals & Drawers */}
-      <GlobalSearchModal 
-        isOpen={isSearchOpen} 
-        onClose={() => setIsSearchOpen(false)} 
-      />
-
-      <NotificationsDrawer 
-        isOpen={isNotificationsOpen} 
-        onClose={() => setIsNotificationsOpen(false)} 
-      />
-
-      <FounderEditModal 
-        isOpen={isProfileModalOpen} 
-        onClose={() => setIsProfileModalOpen(false)} 
-      />
-
-      <FinancialCalendarModal 
-        isOpen={isCalendarOpen}
-        onClose={() => setIsCalendarOpen(false)}
-      />
-
-      <FinancialToolsModal 
-        isOpen={isToolsOpen}
-        onClose={() => setIsToolsOpen(false)}
-      />
-
-      <AssetProtectionModal 
-        isOpen={isProtectionOpen}
-        onClose={() => setIsProtectionOpen(false)}
-      />
-
-      <DocumentVaultModal 
-        isOpen={isVaultModalOpen}
-        onClose={() => setIsVaultModalOpen(false)}
-      />
-
-      <HistoricalAnalyticsDrawer 
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-      />
+      {/* Global Modals & Drawers */}
+      <GlobalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <NotificationsDrawer isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
+      <FounderEditModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+      <FinancialCalendarModal isOpen={isCalendarOpen} onClose={() => setIsCalendarOpen(false)} />
+      <FinancialToolsModal isOpen={isToolsOpen} onClose={() => setIsToolsOpen(false)} />
+      <AssetProtectionModal isOpen={isProtectionOpen} onClose={() => setIsProtectionOpen(false)} />
+      <DocumentVaultModal isOpen={isVaultModalOpen} onClose={() => setIsVaultModalOpen(false)} />
+      <HistoricalAnalyticsDrawer isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
     </>
   );
 };

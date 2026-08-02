@@ -1,117 +1,101 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FinancialProvider } from './context/FinancialContext';
 import { Navbar, type MainHubTab } from './components/layout/Navbar';
-import { QuickActionModal } from './components/common/QuickActionModal';
-
+import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { FounderProfileCard } from './components/dashboard/FounderProfileCard';
 import { SmartGuidesCard } from './components/dashboard/SmartGuidesCard';
 import { AccountsRecordDashboard } from './components/dashboard/AccountsRecordDashboard';
 
 import { IncomeExpenseTracker } from './components/financials/IncomeExpenseTracker';
-import { TaxStrategyHub } from './components/tax/TaxStrategyHub';
 import { CreditScoreHub } from './components/credit/CreditScoreHub';
+import { TaxStrategyHub } from './components/tax/TaxStrategyHub';
 import { DocumentVault } from './components/vault/DocumentVault';
-import { VpsStrategyNotes } from './components/notes/VpsStrategyNotes';
-
-const MainAppContent: React.FC = () => {
-  const [activeHub, setActiveHub] = useState<MainHubTab>('cashflow');
-  const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
-  const [, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return (
-    <div className="min-h-screen bg-[#3a3b40] text-[#101217] font-jakarta p-4 md:p-8 flex flex-col items-center justify-center selection:bg-[#10d670] selection:text-white">
-      
-      {/* Master $50,000+ Frame Container (Exact Match to Reference Layout) */}
-      <div className="master-frame w-full max-w-[1380px] p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden font-jakarta">
-        
-        {/* Master Circular Top Navigation Bar */}
-        <Navbar 
-          activeTab={activeHub} 
-          setActiveTab={setActiveHub} 
-          onOpenQuickAction={() => setIsQuickActionOpen(true)} 
-        />
-
-        {/* HUB 1: MAIN CASHFLOW DASHBOARD (Cloned 100% from reference layout) */}
-        {activeHub === 'cashflow' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Left 2 Columns: Founder Profile (Top) + Smart Guides Cards (Bottom) */}
-            <div className="lg:col-span-2 space-y-6">
-              <FounderProfileCard />
-              <SmartGuidesCard />
-            </div>
-
-            {/* Right Column: Accounts Record Dashboard / AI Counselor Chat */}
-            <div className="lg:col-span-1">
-              <AccountsRecordDashboard />
-            </div>
-
-          </div>
-        )}
-
-        {/* HUB 2: CASH FLOW TRACKER */}
-        {activeHub === 'chat' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <IncomeExpenseTracker />
-            </div>
-            <div className="lg:col-span-1">
-              <VpsStrategyNotes />
-            </div>
-          </div>
-        )}
-
-        {/* HUB 3: CRÉDITO & FICO SCORE */}
-        {activeHub === 'credit' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <CreditScoreHub />
-            </div>
-            <div className="lg:col-span-1">
-              <AccountsRecordDashboard />
-            </div>
-          </div>
-        )}
-
-        {/* HUB 4: TAXES & BÓVEDA OCR */}
-        {activeHub === 'tax' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <TaxStrategyHub />
-            <DocumentVault />
-          </div>
-        )}
-
-        {/* Executive Footer */}
-        <footer className="pt-4 text-center text-xs text-gray-500 border-t border-gray-200/60 font-medium">
-          AURA Financial OS • Architecture $50,000+ Interlocking Executive UI • Servidor VPS 187.77.3.244
-        </footer>
-
-      </div>
-
-      {/* Quick Action Modal */}
-      <QuickActionModal 
-        isOpen={isQuickActionOpen} 
-        onClose={() => setIsQuickActionOpen(false)} 
-      />
-
-    </div>
-  );
-};
+import { QuickActionModal } from './components/common/QuickActionModal';
 
 export function App() {
+  const [activeTab, setActiveTab] = useState<MainHubTab>('cashflow');
+  const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
+
   return (
     <FinancialProvider>
-      <MainAppContent />
+      <div className="min-h-screen bg-[#3A3B40] text-gray-900 font-jakarta antialiased p-2 sm:p-4 md:p-8 flex flex-col justify-center items-center">
+        
+        {/* Master Container Frame ($50,000+ Interlocking Design Canvas) */}
+        <div className="master-frame w-full max-w-7xl bg-[#E1E2E4] min-h-[90vh] rounded-[1.5rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-gray-300/40 relative">
+          
+          {/* Header Navigation */}
+          <Navbar 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onOpenQuickAction={() => setIsQuickActionOpen(true)}
+          />
+
+          {/* Main Content Body */}
+          <main className="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto space-y-6 pb-20 md:pb-8">
+            
+            {activeTab === 'cashflow' && (
+              <div className="space-y-6 animate-fadeIn">
+                
+                {/* 3-Column Executive Grid (Founder + Smart Guides + AI Counselor & Donut Chart) */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                  
+                  {/* Left Column: Section 2 & 3 Stack (Span 2 Cols on Large Screens) */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <FounderProfileCard />
+                    <SmartGuidesCard />
+                    
+                    {/* Secondary Detailed Income & Expense Tracker */}
+                    <IncomeExpenseTracker />
+                  </div>
+
+                  {/* Right Column: AI Counselor Chat + 3-Tone Donut Chart */}
+                  <div className="lg:col-span-1 space-y-6">
+                    <AccountsRecordDashboard />
+                  </div>
+
+                </div>
+
+              </div>
+            )}
+
+            {/* Sub-Views Linked to Navigation */}
+            {activeTab === 'chat' && (
+              <div className="animate-fadeIn">
+                <AccountsRecordDashboard />
+              </div>
+            )}
+
+            {activeTab === 'credit' && (
+              <div className="animate-fadeIn space-y-6">
+                <CreditScoreHub />
+              </div>
+            )}
+
+            {activeTab === 'tax' && (
+              <div className="animate-fadeIn space-y-6">
+                <TaxStrategyHub />
+                <DocumentVault />
+              </div>
+            )}
+
+          </main>
+
+          {/* Mobile Bottom Navigation Bar (Visible only on mobile devices) */}
+          <MobileBottomNav 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onOpenQuickAction={() => setIsQuickActionOpen(true)}
+          />
+
+        </div>
+
+        {/* Global Modals */}
+        <QuickActionModal 
+          isOpen={isQuickActionOpen}
+          onClose={() => setIsQuickActionOpen(false)}
+        />
+
+      </div>
     </FinancialProvider>
   );
 }
