@@ -20,6 +20,7 @@ export const AccountsRecordDashboard: React.FC = () => {
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const recordingTimerRef = useRef<any>(null);
   const recognitionRef = useRef<any>(null);
+  const isStartingRef = useRef<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -33,54 +34,115 @@ export const AccountsRecordDashboard: React.FC = () => {
     scrollToBottom();
   }, [chatMessages]);
 
-  const startVoiceRecording = () => {
+  // Robust Speech-to-Text Voice Recording (Works across iOS Safari, Chrome, and Mobile PWA)
+  const startVoiceRecording = (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
+    if (isRecording || isStartingRef.current) {
+      stopVoiceRecording(e);
+      return;
+    }
+
+    isStartingRef.current = true;
     setIsRecording(true);
     setShowPlusMenu(false);
     setRecordingSeconds(0);
+
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
     recordingTimerRef.current = setInterval(() => {
       setRecordingSeconds(prev => prev + 1);
     }, 1000);
 
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    // Check Speech Recognition API support
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setIsRecording(false);
+      isStartingRef.current = false;
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      alert('Tu navegador no soporta el dictado por voz directo. Por favor usa la opción de teclado o iOS Siri dictado.');
+      return;
+    }
+
+    try {
+      // Stop previous instance if any
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch (_) {}
+      }
+
       const recognition = new SpeechRecognition();
       recognition.lang = 'es-ES';
       recognition.continuous = true;
       recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        isStartingRef.current = false;
+      };
 
       recognition.onresult = (event: any) => {
-        let currentTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          currentTranscript += event.results[i][0].transcript;
+        let fullTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          fullTranscript += event.results[i][0].transcript;
         }
-        if (currentTranscript.trim()) {
-          setInput(currentTranscript);
+        if (fullTranscript.trim()) {
+          setInput(fullTranscript);
         }
       };
 
       recognition.onerror = (err: any) => {
-        console.warn('Speech recognition error:', err);
+        console.warn('Speech recognition error event:', err);
+        isStartingRef.current = false;
+        // Don't kill recording immediately on non-fatal errors
+        if (err.error === 'not-allowed') {
+          alert('Por favor otorga permisos de micrófono a la aplicación en la configuración de Safari/Chrome.');
+          setIsRecording(false);
+        }
       };
 
       recognition.onend = () => {
+        isStartingRef.current = false;
         setIsRecording(false);
         if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
       };
 
       recognition.start();
       recognitionRef.current = recognition;
+    } catch (err) {
+      console.warn('Failed to start speech recognition:', err);
+      isStartingRef.current = false;
+      setIsRecording(false);
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
     }
   };
 
-  const stopVoiceRecording = () => {
+  const stopVoiceRecording = (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
     setIsRecording(false);
+    isStartingRef.current = false;
     if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
       } catch (err) {
         console.warn('Error stopping recognition:', err);
       }
+    }
+  };
+
+  const toggleMic = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isRecording) {
+      stopVoiceRecording(e);
+    } else {
+      startVoiceRecording(e);
     }
   };
 
@@ -104,6 +166,9 @@ export const AccountsRecordDashboard: React.FC = () => {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isRecording) {
+      stopVoiceRecording();
+    }
     if (!input.trim() && attachments.length === 0) return;
     sendChatMessage(input, attachments.length > 0 ? attachments : undefined);
     setInput('');
@@ -166,7 +231,7 @@ export const AccountsRecordDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* True Edge-to-Edge 100% Screen Width Body (No Outer Borders or Encapsulating Margins) */}
+      {/* True Edge-to-Edge 100% Screen Width Body */}
       {!isCollapsed && (
         <div className="w-full pt-4 space-y-4 flex-1 flex flex-col animate-fadeIn transition-all duration-300">
           
@@ -292,7 +357,7 @@ export const AccountsRecordDashboard: React.FC = () => {
                   onClick={stopVoiceRecording}
                   className="px-3.5 py-1.5 rounded-lg bg-[#e64a53] text-white text-xs font-extrabold flex items-center gap-1 hover:bg-red-600"
                 >
-                  <Square className="w-3 h-3 fill-white" /> Listo
+                  <Square className="w-3 h-3 fill-white" /> Detener
                 </button>
               </div>
             )}
@@ -344,19 +409,16 @@ export const AccountsRecordDashboard: React.FC = () => {
                   placeholder={isRecording ? "Escuchando voz..." : "Escribe o habla..."}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  className="w-full pl-4 pr-10 py-3 rounded-full bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670] shadow-2xs"
+                  className="w-full pl-4 pr-11 py-3 rounded-full bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#10d670] shadow-2xs"
                 />
 
                 {/* Inline Mic Icon Inside the Input Pill */}
                 <button
                   type="button"
-                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                  onTouchStart={startVoiceRecording}
-                  onTouchEnd={stopVoiceRecording}
-                  onMouseDown={startVoiceRecording}
-                  onMouseUp={stopVoiceRecording}
-                  className={`absolute right-3 p-1 rounded-full transition-all ${
-                    isRecording ? 'text-red-500 animate-pulse scale-110' : 'text-gray-500 hover:text-[#101217]'
+                  onClick={toggleMic}
+                  onTouchEnd={toggleMic}
+                  className={`absolute right-3 p-1.5 rounded-full transition-all ${
+                    isRecording ? 'text-red-500 animate-pulse scale-110 bg-red-50' : 'text-gray-600 hover:text-[#101217] hover:bg-gray-100'
                   }`}
                   title="Presiona para dictar por voz"
                 >
